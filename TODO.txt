@@ -1,0 +1,15 @@
+/*********************/
+Front End
+- navbar.js
+    - Finish the basic looks
+    - toggle between loggedOut and loggedIn state
+
+
+
+
+/*********************/
+Back End
+- Create node server
+- create login endpoint
+    - research JWT for authentication
+- Connect to cXp db
