@@ -6,10 +6,16 @@ Front End
 
 
 
-
 /*********************/
 Back End
 - Create node server
 - create login endpoint
     - research JWT for authentication
 - Connect to cXp db
+
+
+
+/*********************/
+Optional -- if time allows
+- README.md
+    - make it more personal
