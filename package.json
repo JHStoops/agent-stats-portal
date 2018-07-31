@@ -20,11 +20,12 @@
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
-    "server": "node app",
+    "server": "nodemon app",
     "both": "concurrently \"npm run server\" \"npm run start\""
   },
   "devDependencies": {
-    "concurrently": "^3.6.1"
+    "concurrently": "^3.6.1",
+    "nodemon": "^1.18.3"
   },
   "proxy": "http://localhost:8080/"
 }
