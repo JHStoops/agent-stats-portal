@@ -3,27 +3,65 @@ const router = module.exports = express.Router();
 const db = require('./db');
 //const auth = require('./auth');
 const TABLES = {
-  aetnaConversions: "convl.conversion_summary",
-  caresourceConversions: "convl.caresource_conversion_summary",
-  anthemConversions: "convl.anthem_conversion_summary",
-  agentRoster: "iex_data.nice_agentroster_table",
-  agentStag: "iex_data.stag_adp_employeeinfo"
+  aetna: {
+      table: "convl.conversion_summary",
+      date: "date",
+      returnFields: ["product", "type", "enrollment", "home_appt", "lacb", "non_opp"],
+      additionalWhere: [""]},
+  caresource: {
+      table: "convl.caresource_conversion_summary",
+      date: "interaction_date",
+      returnFields: ["product", "type", "enrollment", "home_appt", "lacb", "opp"],
+      additionalWhere: [""]},
+  anthem: {
+      table: "convl.anthem_conversion_summary",
+      date: "interaction_datetime",
+      returnFields: ["campaign_name", "conversion", "enrollment", "opportunity"],
+      additionalWhere: ["(campaign_name LIKE \"T%- MA%\" OR campaign_name LIKE \"T%- PDP%\")"]},
+  agentRoster: {table: "iex_data.nice_agentroster_table"},
+  agentStag: {table: "iex_data.stag_adp_employeeinfo"}
 };
 
 router.route('/me').get(function(req, res){
     res.status(200).send({name: "Joseph", age: 28});
 });
 
-router.route('/stats/:username').get(function(req, res){
-    const username = req.params.username;
+function dateFormat(date){
+    var mm = date.getMonth() + 1; // getMonth() is zero-based
+    var dd = date.getDate();
 
-    db.query(`SELECT mu FROM ${TABLES.agentRoster} WHERE callpro_userid=${username};`, function(err, data){
-        if (err) throw err;
-        const client = data[0].mu.substring(0, data[0].mu.indexOf(' ')).toLowerCase();
-        console.log(`SELECT * FROM ${TABLES[client + 'Conversions']} WHERE callpro_userid=${username} AND date LIKE "%2018-07%";`);
-        db.query(`SELECT * FROM ${TABLES[client + 'Conversions']} WHERE employee_id="${username}" AND date LIKE "%2018-07%";`, function(err, rows){
+    return [date.getFullYear(),
+        (mm>9 ? '' : '0') + mm,
+        (dd>9 ? '' : '0') + dd
+    ].join('-');
+}
+
+function get(nameForData, query){
+    return new Promise(function(resolve, reject){
+        db.query(query, function(err, rows){
             if (err) throw err;
-            res.status(200).send(rows);
+            console.log('it finished');
+            let data = {};
+            data[nameForData] = rows;
+            resolve(data);
         });
     });
+}
+
+router.route('/stats/:client/:id').get(function(req, res){
+    const id = req.params.id;
+    const client = req.params.client;
+    const table = TABLES[client];
+    const AEPStartDate = '2018-07-01';  //TODO: update this to actual first day -- set for testing value
+    let yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    yesterday = dateFormat(yesterday);
+
+    // Make queries into promises to resolve them all as one
+    const yesterdayPromise = get('yesterday', `SELECT ${table.returnFields.join(', ')} FROM ${table.table} WHERE employee_id="${id}" AND DATE(${table.date})="${yesterday}" ${(table.additionalWhere.length) ? 'AND' : ''} ${table.additionalWhere.join(' AND ')};`);
+    const AEPtoDatePromise = get('AEPtoDate', `SELECT ${table.returnFields.join(', ')} FROM ${table.table} WHERE employee_id="${id}" AND DATE(${table.date}) > "${AEPStartDate}" ${(table.additionalWhere.length) ? 'AND' : ''} ${table.additionalWhere.join(' AND ')};`);
+    const TodayPromise = get('today', `SELECT ${table.returnFields.join(', ')} FROM ${table.table} WHERE employee_id="${id}" AND DATE(${table.date})=CURDATE() ${(table.additionalWhere.length) ? 'AND' : ''} ${table.additionalWhere.join(' AND ')};`);
+    Promise.all([TodayPromise, yesterdayPromise, AEPtoDatePromise])
+        .then( data => res.status(200).send(data) )
+        .catch( err => console.log(err) );
 });

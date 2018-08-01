@@ -8,10 +8,11 @@ Front End
 
 /*********************/
 Back End
-- Create node server
 - create login endpoint
     - research JWT for authentication
-- Connect to cXp db
+- Aetna and CS conveniently have product and type to determine MA vs PDP and New vs Plan change; however, Anthem needs more logic to figure this out
+    - campaign_name will determine MA vs PDP
+    - call_termination_type will determine
 
 
 
