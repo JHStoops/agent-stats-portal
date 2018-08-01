@@ -10,7 +10,7 @@ Front End
 Back End
 - create login endpoint
     - research JWT for authentication
-
+- Make /api/me look at x-authentication header to discern whose info to return.
 
 
 /*********************/

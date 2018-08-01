@@ -22,10 +22,6 @@ const TABLES = {
   agentStag: {table: "iex_data.stag_adp_employeeinfo"}
 };
 
-router.route('/me').get(function(req, res){
-    res.status(200).send({name: "Joseph", age: 28});
-});
-
 function dateFormat(date){
     const mm = date.getMonth() + 1; // getMonth() is zero-based
     const dd = date.getDate();
@@ -43,6 +39,10 @@ function get(nameForData, query){
         });
     });
 }
+
+router.route('/me').get(function(req, res){
+    res.status(200).send({name: "Joseph", age: 28});
+});
 
 router.route('/stats/:client/:id').get(function(req, res){
     const id = req.params.id;
@@ -66,6 +66,9 @@ router.route('/stats/:client/:id').get(function(req, res){
                         if (el.product.includes('- MA')) el.product = "MA";
                         else if (el.product.includes('- PDP')) el.product = "PDP";
                         else el.product = "None";
+
+                        //convert call_termination_type HPA to plan change and T2 to New Enrollment
+
                     })
                 }
             res.status(200).send(data)
