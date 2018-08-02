@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
-import NavBar from './components/navbar.js';
-require('./css/index.css');
 // import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap'; //https://reactstrap.github.io/components/modals/
+
+const NavBar = require('./components/navbar.js');
+require('./css/index.css');
 
 class App extends Component {
   render() {

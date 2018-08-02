@@ -7,83 +7,65 @@ import {
     Nav,
     NavItem,
     NavLink,
-    UncontrolledDropdown,
-    DropdownToggle,
-    DropdownMenu,
-    DropdownItem,
     Button,
-    Form,
-    FormGroup,
-    Label,
     InputGroup,
-    InputGroupText,
     InputGroupAddon,
     Input} from 'reactstrap';
 
-export default class Example extends React.Component {
+export default class TopNavbar extends React.Component {
     constructor(props) {
         super(props);
 
         this.toggle = this.toggle.bind(this);
         this.state = {
-            isOpen: false
+            isOpen: false,
+            loggedIn: false,
+            username: '',
+            password: ''
         };
     }
     toggle() {
-        this.setState({
-            isOpen: !this.state.isOpen
-        });
+        this.setState({ isOpen: !this.state.isOpen });
+    }
+    handleChange(e){
+        this.setState({ [e.target.name]: e.target.value });
+    }
+    login() {
+        this.setState({ loggedIn: true });
+        //TODO: add input validation
+        //TODO: tie in api call
+    }
+    logout() {
+        this.setState({ loggedIn: false });
     }
     render() {
+        const isLoggedIn = (this.state.loggedIn) ?
+                (
+                    <NavItem>
+                        <NavLink href="/" onClick={this.logout.bind(this)}>Logout</NavLink>    {/*TODO: Make this a logout button and a "Hello, [agentname]" or something*/}
+                    </NavItem>
+                )
+                :
+                (
+                <InputGroup>
+                    <InputGroupAddon addonType="prepend">
+                        <Input type="text" onChange={ this.handleChange.bind(this) } name="username" id="username" placeholder="Username" />
+                    </InputGroupAddon>
+                    <Input type="password" onChange={ this.handleChange.bind(this) } name="password" id="password" placeholder="password" />
+                    <InputGroupAddon addonType="append">
+                        <Button onClick={this.login.bind( this )}>Login</Button>
+                    </InputGroupAddon>
+                </InputGroup>
+            );
+
         return (
             <div id="navbar">
                 <Navbar color="light" light expand="md">
-                    <NavbarBrand href="/">reactstrap</NavbarBrand>
+                    <NavbarBrand href="/"><img src="/public/cXp_Logo.png"/></NavbarBrand>
                     <NavbarToggler onClick={this.toggle} />
                     <Collapse isOpen={this.state.isOpen} navbar>
                         <Nav className="ml-auto" navbar>
-                            <InputGroup>
-                                <InputGroupAddon addonType="prepend">
-                                    <Input type="text" name="username" id="username" placeholder="Username" />
-                                </InputGroupAddon>
-                                <Input placeholder="and..." />
-                                <InputGroupAddon addonType="append">
-                                    <Button>Login</Button>
-                                </InputGroupAddon>
-                            </InputGroup>
-                            {/*<InputGroup>*/}
-                                {/*<InputGroupAddon addonType="prepend">*/}
-                                    {/*<Label for="username" hidden>Username</Label>*/}
-                                    {/*<Input type="text" name="username" id="username" placeholder="Username" />*/}
-                                {/*</InputGroupAddon>*/}
-                                {/*<Input type="password" name="password" id="password" placeholder="password" />*/}
-                                {/*<InputGroupAddon addonType="append">*/}
-                                    {/*<Button>Login</Button>*/}
-                                {/*</InputGroupAddon>*/}
-                            {/*</InputGroup>*/}
-                            <NavItem>
-                                <NavLink href="/components/">Components</NavLink>
-                            </NavItem>
-                            <NavItem>
-                                <NavLink href="https://github.com/reactstrap/reactstrap">GitHub</NavLink>
-                            </NavItem>
-                            <UncontrolledDropdown nav inNavbar>
-                                <DropdownToggle nav caret>
-                                    Options
-                                </DropdownToggle>
-                                <DropdownMenu right>
-                                    <DropdownItem>
-                                        Option 1
-                                    </DropdownItem>
-                                    <DropdownItem>
-                                        Option 2
-                                    </DropdownItem>
-                                    <DropdownItem divider />
-                                    <DropdownItem>
-                                        Reset
-                                    </DropdownItem>
-                                </DropdownMenu>
-                            </UncontrolledDropdown>
+                            { isLoggedIn }
                         </Nav>
                     </Collapse>
                 </Navbar>

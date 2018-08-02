@@ -1,8 +1,10 @@
 /*********************/
 Front End
 - navbar.js
-    - Finish the basic looks
-    - toggle between loggedOut and loggedIn state
+    - Add input validation to the login form
+    - Tie it into the api endpoint /login
+        - if successful, run /me endpoint for agent info... or should /login just return that info on success?
+        - if failed, display an error message
 
 
 
