@@ -3,12 +3,10 @@ const logger = require('morgan');
 const favicon = require('serve-favicon');
 const helmet = require('helmet');
 const config = require('config');
-//const history = require('connect-history-api-fallback');  //For single page app routing
 const WEB = __dirname.replace('app', 'src');
 const app = module.exports = express();
 const api = require('./api');
 const db = require('./db');
-//const auth = require('./auth');
 
 app.use(helmet());
 app.use(logger(config.logFormat));
@@ -16,12 +14,8 @@ app.use(favicon(config.favicon));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Authenticate
-//app.use(auth.authenticate);
-
 // API router
 app.use('/api', api);
-//app.use(history());
 
 // Vue & static assets
 app.use(express.static(WEB.substring(0, WEB.length -3)));

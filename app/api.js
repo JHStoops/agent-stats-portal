@@ -1,7 +1,8 @@
 const express = require('express');
 const router = module.exports = express.Router();
+const ldapOptions = require('config').ldap;
+const ldap = require('ldapjs');         // http://ldapjs.org/client.html
 const db = require('./db');
-//const auth = require('./auth');
 const TABLES = {
   aetna: {
       table: "convl.conversion_summary",
@@ -40,8 +41,20 @@ function get(nameForData, query){
     });
 }
 
-router.route('/me').get(function(req, res){
-    res.status(200).send({name: "Joseph", age: 28});
+router.route('/login').post(function(req, res){
+    if (!req.hasOwnProperty('body')) res.sendStatus(401);
+    if (req.body.username == null || req.body.password == null) res.sendStatus(401);
+    if(!ldap) res.sendStatus(401);
+
+    let client = ldap.createClient(ldapOptions.connstr);
+    client.bind(`CN=${req.body.username},${ldapOptions.base}`, req.body.password, (err) => {
+        if(err) {
+            console.error(err);
+            res.sendStatus(401);
+            return;
+        }
+        res.status(201).send({username: req.body.username});
+    });
 });
 
 router.route('/stats/:client/:id').get(function(req, res){

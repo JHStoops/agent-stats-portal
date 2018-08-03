@@ -33,7 +33,15 @@ export default class TopNavbar extends React.Component {
     login() {
         this.setState({ loggedIn: true });
         //TODO: add input validation
-        //TODO: tie in api call
+        fetch('http://localhost:3000/api/login', {
+            method: 'POST',
+            body: JSON.stringify({username: this.state.username, password: this.state.password}),
+            headers: {
+                'accept': 'application/json',
+                'content-type': 'application/json'
+            }
+        })
+            .then( res => console.log("res: " + res) )
     }
     logout() {
         this.setState({ loggedIn: false });
@@ -61,7 +69,7 @@ export default class TopNavbar extends React.Component {
         return (
             <div id="navbar">
                 <Navbar color="light" light expand="md">
-                    <NavbarBrand href="/"><img src="/public/cXp_Logo.png"/></NavbarBrand>
+                    <NavbarBrand href="/"><img src="/public/cXp_Logo.png" alt="AEP 2018 Agent Stats Portal"/></NavbarBrand>
                     <NavbarToggler onClick={this.toggle} />
                     <Collapse isOpen={this.state.isOpen} navbar>
                         <Nav className="ml-auto" navbar>
