@@ -32,16 +32,40 @@ export default class TopNavbar extends React.Component {
     }
     login() {
         this.setState({ loggedIn: true });
+        const self = this;
         //TODO: add input validation
-        fetch('http://localhost:3000/api/login', {
+        fetch('http://localhost:3000/api/me', {
             method: 'POST',
-            body: JSON.stringify({username: this.state.username, password: this.state.password}),
+            body: JSON.stringify({username: self.state.username}),
             headers: {
                 'accept': 'application/json',
                 'content-type': 'application/json'
             }
         })
-            .then( res => console.log("res: " + res) )
+            .then( function(user){
+                console.log(user);
+            })
+        // fetch('http://localhost:3000/api/login', {
+        //     method: 'POST',
+        //     body: JSON.stringify({username: this.state.username, password: this.state.password}),
+        //     headers: {
+        //         'accept': 'application/json',
+        //         'content-type': 'application/json'
+        //     }
+        // })
+        //     .then( function(res){
+        //         fetch('http://localhost:3000/api/me', {
+        //             method: 'POST',
+        //             body: JSON.stringify({username: self.state.username}),
+        //             headers: {
+        //                 'accept': 'application/json',
+        //                 'content-type': 'application/json'
+        //             }
+        //         })
+        //             .then( function(user){
+        //                 console.log(user);
+        //             })
+        //     })
     }
     logout() {
         this.setState({ loggedIn: false });

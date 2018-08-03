@@ -19,8 +19,8 @@ const TABLES = {
       date: "interaction_datetime",
       returnFields: [{field: "campaign_name", as: "product"}, {field: "enrollment", as: "enrollment"}, {field: "conversion", as: "callerType"}, {field: "opportunity", as: "opportunity"}],
       additionalWhere: ["campaign_id IN (898, 894, 671, 681, 894, 898, 641, 731, 701, 631, 741, 661, 651)"]},
-  agentRoster: {table: "iex_data.nice_agentroster_table"},
-  agentStag: {table: "iex_data.stag_adp_employeeinfo"}
+  agentRoster: { table: "iex_data.nice_agentroster_table" },
+  agentStag: { table: "iex_data.stag_adp_employeeinfo" }
 };
 
 function dateFormat(date){
@@ -29,11 +29,12 @@ function dateFormat(date){
     return [date.getFullYear(), (mm>9 ? '' : '0') + mm, (dd>9 ? '' : '0') + dd].join('-');
 }
 
-function get(nameForData, query){
+function get(query, nameForData){
     console.log(query);
     return new Promise(function(resolve, reject){
         db.query(query, function(err, rows){
             if (err) reject(err);
+            if (!nameForData) resolve(rows);
             let data = {};
             data[nameForData] = rows;
             resolve(data);
@@ -48,13 +49,29 @@ router.route('/login').post(function(req, res){
 
     let client = ldap.createClient(ldapOptions.connstr);
     client.bind(`CN=${req.body.username},${ldapOptions.base}`, req.body.password, (err) => {
-        if(err) {
-            console.error(err);
-            res.sendStatus(401);
-            return;
-        }
-        res.status(201).send({username: req.body.username});
+        if(err) res.sendStatus(401);
+        else res.status(201).send({username: req.body.username});
     });
+});
+
+router.route('/me').post(function(req, res){
+    const query = `
+        SELECT stag.givenName AS name, stag.username, nice.mu AS client, nice.callpro_userid AS userid
+        FROM iex_data.stag_adp_employeeinfo AS stag, 
+             iex_data.nice_agentroster_table AS nice 
+        WHERE stag.positionStatusCode NOT IN ('T', 'D')
+            AND nice.skill_team != 'Inactive'
+            AND stag.positionID = nice.adp_id
+            AND stag.username = '${req.body.username}';
+    `;
+    get(query)
+        .then( function(data){
+            let user = data[0];
+            user.site = user.client.substr(user.client.indexOf(' ') + 1);
+            user.client = user.client.substr(0, user.client.indexOf(' '))
+            res.status(201).send(user)
+        })
+        .catch( err => res.sendStatus(401) );
 });
 
 router.route('/stats/:client/:id').get(function(req, res){
@@ -67,9 +84,9 @@ router.route('/stats/:client/:id').get(function(req, res){
     yesterday = dateFormat(yesterday);
 
     //Make queries into promises to resolve them all as one
-    const yesterdayPromise = get('yesterday', `SELECT ${table.returnFields.map( val => val.field + ' AS ' + val.as).join(', ')} FROM ${table.table} WHERE employee_id="${id}" AND DATE(${table.date})="${yesterday}" ${(table.additionalWhere.length) ? 'AND' : ''} ${table.additionalWhere.join(' AND ')};`);
-    const aepToDatePromise = get('aepToDate', `SELECT ${table.returnFields.map( val => val.field + ' AS ' + val.as).join(', ')} FROM ${table.table} WHERE employee_id="${id}" AND DATE(${table.date}) > "${aepStartDate}" ${(table.additionalWhere.length) ? 'AND' : ''} ${table.additionalWhere.join(' AND ')};`);
-    const TodayPromise = get('today', `SELECT ${table.returnFields.map( val => val.field + ' AS ' + val.as, '').join(', ')} FROM ${table.table} WHERE employee_id="${id}" AND DATE(${table.date})=CURDATE() ${(table.additionalWhere.length) ? 'AND' : ''} ${table.additionalWhere.join(' AND ')};`);
+    const yesterdayPromise = get(`SELECT ${table.returnFields.map( val => val.field + ' AS ' + val.as).join(', ')} FROM ${table.table} WHERE employee_id="${id}" AND DATE(${table.date})="${yesterday}" ${(table.additionalWhere.length) ? 'AND' : ''} ${table.additionalWhere.join(' AND ')};`, 'yesterday');
+    const aepToDatePromise = get(`SELECT ${table.returnFields.map( val => val.field + ' AS ' + val.as).join(', ')} FROM ${table.table} WHERE employee_id="${id}" AND DATE(${table.date}) > "${aepStartDate}" ${(table.additionalWhere.length) ? 'AND' : ''} ${table.additionalWhere.join(' AND ')};`, 'aepToDate');
+    const TodayPromise = get(`SELECT ${table.returnFields.map( val => val.field + ' AS ' + val.as, '').join(', ')} FROM ${table.table} WHERE employee_id="${id}" AND DATE(${table.date})=CURDATE() ${(table.additionalWhere.length) ? 'AND' : ''} ${table.additionalWhere.join(' AND ')};`, 'today');
     Promise.all([TodayPromise, yesterdayPromise, aepToDatePromise])
         .then( data => {
             if (client.toLowerCase() === "anthem")

@@ -11,6 +11,7 @@ Front End
 /*********************/
 Back End
 - figure out what to store in sessionStorage/localstorage to uniquely identify who is logged in.
+- Handle login errors without crashing the server
 
 
 /*********************/
