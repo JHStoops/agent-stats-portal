@@ -30,7 +30,6 @@ function dateFormat(date){
 }
 
 function get(query, nameForData){
-    console.log(query);
     return new Promise(function(resolve, reject){
         db.query(query, function(err, rows){
             if (err) reject(err);
@@ -40,6 +39,18 @@ function get(query, nameForData){
             resolve(data);
         });
     });
+}
+
+function veryBasicEncryption(str){
+    let encrypted = Buffer.from(str).toString('base64');
+    encrypted = Buffer.from(encrypted + 'Monkeys are bananas').toString('base64');
+    return encrypted;
+}
+
+function veryBasicDecryption(str){
+    let decrypted = Buffer.from(str, 'base64').toString();
+    decrypted = Buffer.from(decrypted.replace('Monkeys are bananas', ''), 'base64').toString();
+    return decrypted;
 }
 
 router.route('/login').post(function(req, res){
@@ -68,20 +79,25 @@ router.route('/me').post(function(req, res){
         .then( function(data){
             let user = data[0];
             user.site = user.client.substr(user.client.indexOf(' ') + 1);
-            user.client = user.client.substr(0, user.client.indexOf(' '))
+            user.client = user.client.substr(0, user.client.indexOf(' '));
+            user.hash = veryBasicEncryption(user.userid);
             res.status(201).send(user)
         })
         .catch( err => res.sendStatus(401) );
 });
 
 router.route('/stats/:client/:id').get(function(req, res){
-    const id = req.params.id;
-    const client = req.params.client;
+    const id = req.params.id.toLowerCase();
+    const client = req.params.client.toLowerCase();
+    const hash = req.headers['x-authentication'];
     const table = TABLES[client];
     const aepStartDate = '2018-07-01';  //TODO: update this to actual first day -- set for testing value
     let yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     yesterday = dateFormat(yesterday);
+
+    //Authorization
+    if (id != veryBasicDecryption(hash)) res.sendStatus(403);
 
     //Make queries into promises to resolve them all as one
     const yesterdayPromise = get(`SELECT ${table.returnFields.map( val => val.field + ' AS ' + val.as).join(', ')} FROM ${table.table} WHERE employee_id="${id}" AND DATE(${table.date})="${yesterday}" ${(table.additionalWhere.length) ? 'AND' : ''} ${table.additionalWhere.join(' AND ')};`, 'yesterday');

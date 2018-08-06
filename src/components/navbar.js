@@ -34,17 +34,8 @@ export default class TopNavbar extends React.Component {
         this.setState({ loggedIn: true });
         const self = this;
         //TODO: add input validation
-        fetch('http://localhost:3000/api/me', {
-            method: 'POST',
-            body: JSON.stringify({username: self.state.username}),
-            headers: {
-                'accept': 'application/json',
-                'content-type': 'application/json'
-            }
-        })
-            .then( function(user){
-                console.log(user);
-            })
+
+        // TODO: commented to skip the ldap login, since my account doesn't have agent data...
         // fetch('http://localhost:3000/api/login', {
         //     method: 'POST',
         //     body: JSON.stringify({username: this.state.username, password: this.state.password}),
@@ -54,17 +45,30 @@ export default class TopNavbar extends React.Component {
         //     }
         // })
         //     .then( function(res){
-        //         fetch('http://localhost:3000/api/me', {
-        //             method: 'POST',
-        //             body: JSON.stringify({username: self.state.username}),
-        //             headers: {
-        //                 'accept': 'application/json',
-        //                 'content-type': 'application/json'
-        //             }
-        //         })
-        //             .then( function(user){
-        //                 console.log(user);
-        //             })
+                fetch('http://localhost:3000/api/me', {
+                    method: 'POST',
+                    body: JSON.stringify({username: self.state.username}),
+                    headers: {
+                        'accept': 'application/json',
+                        'content-type': 'application/json'
+                    }
+                })
+                    .then( data => data.json() )
+                    .then( function(user){
+
+                        fetch(`http://localhost:3000/api/stats/${user.client}/${user.userid}`, {
+                            method: 'GET',
+                            headers: {
+                                'accept': 'application/json',
+                                'content-type': 'application/json',
+                                'x-authentication': user.hash + '23'
+                            }
+                        })
+                            .then( function(user){
+                                console.log(user);
+                            })
+
+                    })
         //     })
     }
     logout() {

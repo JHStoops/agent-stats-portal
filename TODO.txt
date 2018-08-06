@@ -5,13 +5,14 @@ Front End
     - Tie it into the api endpoint /login
         - if successful, run /me endpoint for agent info... or should /login just return that info on success?
         - if failed, display an error message
+-
 
 
 
 /*********************/
 Back End
 - figure out what to store in sessionStorage/localstorage to uniquely identify who is logged in.
-- Handle login errors without crashing the server
+-
 
 
 /*********************/
