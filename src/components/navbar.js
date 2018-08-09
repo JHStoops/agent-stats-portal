@@ -66,6 +66,7 @@ export default class TopNavbar extends React.Component {
                         })
                             .then( function(user){
                                 console.log(user);
+                                self.props.toggleLoggedIn();
                             })
 
                     })

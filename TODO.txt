@@ -2,10 +2,40 @@
 Front End
 - navbar.js
     - Add input validation to the login form
-    - Tie it into the api endpoint /login
-        - if successful, run /me endpoint for agent info... or should /login just return that info on success?
-        - if failed, display an error message
--
+    - if /login failed, display an error message
+- stats.js
+    - Aetna
+        - AEP % to goal per site
+        - Separate Grand Prize per site/LoB
+            - 1 entry for every 5 New Enrollments (MA/PDP combined).
+        - stats from yesterday, AEP-to-date, and today’s (live)
+            - MANE  - Total # of enrollments and Conversion% (Home Visit + LACB + MANE)/Total MA Prospect Calls .
+            - PDPNE - Total # of enrollments and Conversion% PDPNE/Total PDP Prospect Calls.
+        - Spreadsheet with all agents’ stats reported near the end of AEP
+            - Function that randomly draws winner of grand prize based on number of entries.
+        - ut to use graphics by Ben Asper
+    - CareSource
+        - AEP % to goal per site
+        - stats from yesterday, AEP-to-date, and today’s (live)
+            -MANE - Total # of enrollments and Conversion% MANE/Total MA Prospect Calls.
+        - No Grand prize
+        - Spreadsheet with all agents’ stats reported near the end of AEP
+        - ut to use graphics by Ben Asper
+    - Anthem
+        - stats from yesterday, AEP-to-date, and today’s (live)
+            - Enrollments – will be MAPD, PDP, AE, MS, Non-GI MS, total number of enrollments and completion percentage
+            - HPA -- plan change
+                - Total number of quotes and conversion percentage (Quote ID Provided – Transfer to T3)
+            - T2 -- new enrollment
+                - Total number of quotes and conversion percentage (Quote ID Provided – Transfer to T3)
+        - Grand Prize
+            - “Entries” into the drawings are 1 entry for every 10 T2 quotes, 1 entry for every 5 HPA quotes, and 1 entry for every 2 successfully submitted application.
+                - Potentially a timeframe each day for double entries (power hour)
+            - The drawings we will need to have two ticket entry portions.
+                - The first one is going to be done on a weekly basis, just for weeks 3-6 of AEP (Oct. 14th – Nov. 10th),
+                - The second one will be an AEP to date.
+
+
 
 
 
