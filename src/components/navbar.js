@@ -19,7 +19,6 @@ export default class TopNavbar extends React.Component {
         this.toggle = this.toggle.bind(this);
         this.state = {
             isOpen: false,
-            loggedIn: false,
             username: '',
             password: ''
         };
@@ -31,7 +30,6 @@ export default class TopNavbar extends React.Component {
         this.setState({ [e.target.name]: e.target.value });
     }
     login() {
-        this.setState({ loggedIn: true });
         const self = this;
         //TODO: add input validation
 
@@ -54,8 +52,17 @@ export default class TopNavbar extends React.Component {
                     }
                 })
                     .then( data => data.json() )
-                    .then( function(user){
+                    .then( function(user) {
+                        // TODO: should this be stored in react component instead, and loaded on refresh?
+                        //store user info
+                        sessionStorage.setItem('client', user.client);
+                        sessionStorage.setItem('userid', user.userid);
+                        sessionStorage.setItem('name', user.name);
+                        sessionStorage.setItem('site', user.site);
+                        sessionStorage.setItem('username', user.username);
+                        sessionStorage.setItem('hash', user.hash);
 
+                        //fetch agent stats
                         fetch(`http://localhost:3000/api/stats/${user.client}/${user.userid}`, {
                             method: 'GET',
                             headers: {
@@ -64,22 +71,31 @@ export default class TopNavbar extends React.Component {
                                 'x-authentication': user.hash + '23'
                             }
                         })
-                            .then( function(user){
-                                console.log(user);
-                                self.props.toggleLoggedIn();
+                            .then( data => data.json() )
+                            .then( function(stats){
+                                console.log(stats);
+                                self.props.setStats(stats);
+                                self.props.toggleLoggedIn(true);
                             })
 
                     })
         //     })
     }
     logout() {
-        this.setState({ loggedIn: false });
+        sessionStorage.clear();
+        this.props.toggleLoggedIn(false);
     }
     render() {
-        const isLoggedIn = (this.state.loggedIn) ?
+        const self = this;
+        function handleLogout(e) {
+            e.preventDefault();
+            self.logout();
+        }
+
+        const loggedInState = (this.props.getLoggedIn()) ?
                 (
                     <NavItem>
-                        <NavLink href="/" onClick={this.logout.bind(this)}>Logout</NavLink>    {/*TODO: Make this a logout button and a "Hello, [agentname]" or something*/}
+                        <NavLink href="#" onClick={handleLogout}>Logout</NavLink>    {/*TODO: Make this a logout button and a "Hello, [agentname]" or something*/}
                     </NavItem>
                 )
                 :
@@ -98,11 +114,11 @@ export default class TopNavbar extends React.Component {
         return (
             <div id="navbar">
                 <Navbar color="light" light expand="md">
-                    <NavbarBrand href="/"><img src="/public/cXp_Logo.png" alt="AEP 2018 Agent Stats Portal"/></NavbarBrand>
+                    <NavbarBrand href="/"><img src={ (['Aetna'].includes(sessionStorage.getItem('client')) ) ? "/public/ELEVATE4.4.png" : "/public/cXp_Logo.png"} width="108" height="80" alt="AEP 2018 Agent Stats Portal"/></NavbarBrand>
                     <NavbarToggler onClick={this.toggle} />
                     <Collapse isOpen={this.state.isOpen} navbar>
                         <Nav className="ml-auto" navbar>
-                            { isLoggedIn }
+                            { loggedInState }
                         </Nav>
                     </Collapse>
                 </Navbar>

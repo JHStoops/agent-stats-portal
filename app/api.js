@@ -105,9 +105,9 @@ router.route('/stats/:client/:id').get(function(req, res){
     const TodayPromise = get(`SELECT ${table.returnFields.map( val => val.field + ' AS ' + val.as, '').join(', ')} FROM ${table.table} WHERE employee_id="${id}" AND DATE(${table.date})=CURDATE() ${(table.additionalWhere.length) ? 'AND' : ''} ${table.additionalWhere.join(' AND ')};`, 'today');
     Promise.all([TodayPromise, yesterdayPromise, aepToDatePromise])
         .then( data => {
-            if (client.toLowerCase() === "anthem")
+            if (client.toLowerCase() === "anthem") {
                 for (let set of data) {
-                    set[Object.keys(set)[0]].forEach( function(el){     //due to the data structure, we have to find the object attribute name to access the data
+                    set[Object.keys(set)[0]].forEach(function (el) {     //due to the data structure, we have to find the object attribute name to access the data
                         //convert campaign_name into a valid product field
                         if (el.product.includes('- MA')) el.product = "MA";
                         else if (el.product.includes('- PDP')) el.product = "PDP";
@@ -117,7 +117,13 @@ router.route('/stats/:client/:id').get(function(req, res){
 
                     })
                 }
-            res.status(200).send(data)
+            }
+
+            //Convert data array to an associative array
+            let conversions = {};
+            for (let i = 0; i < data.length; i++) Object.assign(conversions, data[i])
+
+            res.status(200).send(conversions)
         })
         .catch( err => console.log(err) );
 });

@@ -9,18 +9,35 @@ class App extends Component {
     constructor(props) {
         super(props);
         this.toggleLoggedIn = this.toggleLoggedIn.bind(this);
+        this.getLoggedIn = this.getLoggedIn.bind(this);
+        this.setStats = this.setStats.bind(this);
+        this.getStats = this.getStats.bind(this);
         this.state = {
-            loggedIn: false
+            loggedIn: false,
+            stats: []
         };
     }
-    toggleLoggedIn() {
-        this.setState({loggedIn: !this.state.loggedIn});
+    getLoggedIn(){
+        return this.state.loggedIn;
+    }
+    toggleLoggedIn(b) {
+        if (b === undefined) this.setState({loggedIn: !this.state.loggedIn});
+        else this.setState({loggedIn: b});
+    }
+    getStats(){
+        return this.state.stats;
+    }
+    setStats(payload){
+        this.setState({stats: payload});
+    }
+    componentDidMount() {
+        if (sessionStorage.getItem('hash') !== null) this.setState({ loggedIn: true});
     }
     render() {
         return (
             <div>
-                <TopNavbar toggleLoggedIn={ this.toggleLoggedIn }/>
-                <Stats loggedIn={ this.state.loggedIn } />
+                <TopNavbar getLoggedIn={ this.getLoggedIn } toggleLoggedIn={ this.toggleLoggedIn } setStats={ this.setStats }/>
+                <Stats getLoggedIn={ this.getLoggedIn} getStats={ this.getStats }/>
             </div>
         );
     }
