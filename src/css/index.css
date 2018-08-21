@@ -10,3 +10,12 @@ body {
 #navbar button {
   height: 38px;
 }
+td[colspan] {
+  text-align: center;
+}
+.MAS {
+  background-color: #efefef;
+}
+.PDP {
+  background-color: white;
+}

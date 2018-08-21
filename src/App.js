@@ -30,8 +30,24 @@ class App extends Component {
     setStats(payload){
         this.setState({stats: payload});
     }
-    componentDidMount() {
-        if (sessionStorage.getItem('hash') !== null) this.setState({ loggedIn: true});
+    componentWillMount() {
+        if (sessionStorage.getItem('hash') !== null) {
+            this.setState({ loggedIn: true});
+            const self = this;
+            fetch(`http://localhost:3000/api/stats/${sessionStorage.getItem('client')}/${sessionStorage.getItem('userid')}`, {
+                method: 'GET',
+                headers: {
+                    'accept': 'application/json',
+                    'content-type': 'application/json',
+                    'x-authentication': sessionStorage.getItem('hash')
+                }
+            })
+                .then( data => data.json() )
+                .then( function(stats){
+                    console.log(stats);
+                    self.state.stats = stats;
+                })
+        }
     }
     render() {
         return (

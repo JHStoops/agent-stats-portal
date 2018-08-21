@@ -4,6 +4,8 @@ Front End
     - Add input validation to the login form
     - if /login failed, display an error message
 - stats.js
+    - Find a way to dynamically display stats for logged in user that refreshes...
+    - Make the MA/PDP separation design prettier
     - Aetna
         - AEP % to goal per site
         - Separate Grand Prize per site/LoB
