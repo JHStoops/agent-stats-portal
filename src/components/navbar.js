@@ -19,7 +19,7 @@ export default class TopNavbar extends React.Component {
         this.toggle = this.toggle.bind(this);
         this.state = {
             isOpen: false,
-            username: '',
+            username: 'grliddiard',
             password: ''
         };
     }
@@ -102,7 +102,7 @@ export default class TopNavbar extends React.Component {
                 (
                 <InputGroup>
                     <InputGroupAddon addonType="prepend">
-                        <Input type="text" onChange={ this.handleChange.bind(this) } name="username" id="username" placeholder="Username" />
+                        <Input type="text" onChange={ this.handleChange.bind(this) } name="username" id="username" placeholder="Username" value={this.state.username} />
                     </InputGroupAddon>
                     <Input type="password" onChange={ this.handleChange.bind(this) } name="password" id="password" placeholder="password" />
                     <InputGroupAddon addonType="append">

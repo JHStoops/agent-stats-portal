@@ -8,9 +8,6 @@ Front End
         - AEP % to goal per site
         - Separate Grand Prize per site/LoB
             - 1 entry for every 5 New Enrollments (MA/PDP combined).
-        - stats from yesterday, AEP-to-date, and today’s (live)
-            - MANE  - Total # of enrollments and Conversion% (Home Visit + LACB + MANE)/Total MA Prospect Calls .
-            - PDPNE - Total # of enrollments and Conversion% PDPNE/Total PDP Prospect Calls.
         - Spreadsheet with all agents’ stats reported near the end of AEP
             - Function that randomly draws winner of grand prize based on number of entries.
         - ut to use graphics by Ben Asper
