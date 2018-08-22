@@ -47,6 +47,7 @@ class App extends Component {
                     console.log(stats);
                     self.setState({stats: stats});
                 })
+                .catch( err => {console.log(err); self.toggleLoggedIn(false);});
         }
     }
     render() {

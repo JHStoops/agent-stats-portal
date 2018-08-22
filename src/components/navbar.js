@@ -68,7 +68,7 @@ export default class TopNavbar extends React.Component {
                             headers: {
                                 'accept': 'application/json',
                                 'content-type': 'application/json',
-                                'x-authentication': user.hash + '23'
+                                'x-authentication': user.hash
                             }
                         })
                             .then( data => data.json() )
@@ -77,7 +77,7 @@ export default class TopNavbar extends React.Component {
                                 self.props.setStats(stats);
                                 self.props.toggleLoggedIn(true);
                             })
-
+                            .catch( err => {console.log(err); self.props.toggleLoggedIn(false);})
                     })
         //     })
     }

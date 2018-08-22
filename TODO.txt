@@ -1,5 +1,7 @@
 /*********************/
 Front End
+- ALL
+    - Only log out agent on 403 error
 - navbar.js
     - Add input validation to the login form
     - if /login failed, display an error message

@@ -4,7 +4,14 @@ import { Table } from 'reactstrap';
 class Stats extends Component {
     constructor(props) {
         super(props);
-        this.state = {};
+        this.state = {
+            loggedId: this.props.getLoggedIn,
+            siteGoal: {
+                'Aetna': 200,
+                'Anthem': 175,
+                'CareSource': 120
+            }
+        };
     }
     render() {
         let conversions = this.props.getStats();
@@ -87,15 +94,15 @@ class Stats extends Component {
                         <th></th>
                         <th className="MAL">Calls</th>
                         <th>Opportunities</th>
-                        <th>Enrollments</th>
-                        <th>Plan Changes</th>
+                        <th>NE</th>
+                        <th>PC</th>
                         <th>HV</th>
                         <th>LACB</th>
-                        <th className="MAR">Conversion Rate</th>
+                        <th className="MAR">Conversion %</th>
                         <th>Calls</th>
                         <th>Opportunities</th>
-                        <th>Enrollments</th>
-                        <th>Plan Changes</th>
+                        <th>NE</th>
+                        <th>PC</th>
                         <th>Conversion %</th>
                     </tr>
                     </thead>
@@ -111,8 +118,37 @@ class Stats extends Component {
                 <p>Please log in</p>
             );
 
+
+
+        const generalStats = (this.props.getLoggedIn()) ? (
+                <div id="generalStats" className="container row">
+                    <div id="siteGoal" className="offset-3 col-3 text-center row">
+                        <div id="siteGoalBreakdown" className="col-8 row">
+                            <span className="col-6">MANE:</span>
+                            <span className="col-6">{ enrollments(conversions.aepToDate, 'MA', 'P') }</span>
+                            <br />
+                            <span className="col-6">Goal:</span>
+                            <span className="col-6">{ this.state.siteGoal[sessionStorage.getItem('client')] }</span>
+                        </div>
+                        <span id="siteGoalPercent" className="col-4">
+                            { Number(enrollments(conversions.aepToDate, 'MA', 'P') / this.state.siteGoal[sessionStorage.getItem('client')] * 100).toFixed(2)}%
+                        </span>
+                    </div>
+                    <div id="gpEntries" className="offset-1 col-5 text-center">
+                        Grand Prize Entries: { Math.floor(
+                            ( enrollments(conversions.aepToDate, 'MA', 'P')
+                                + enrollments(conversions.aepToDate, 'PDP', 'P') )
+                            / 5 // Every 5 new enrollments gives an entry to the gp drawing
+                        ) }
+                    </div>
+                </div>
+            )
+        :
+            (<div id="generalStats"></div>);
+
         return (
             <div id="stats">
+                { generalStats }
                 { table }
             </div>
         );

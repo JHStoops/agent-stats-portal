@@ -97,7 +97,10 @@ router.route('/stats/:client/:id').get(function(req, res){
     yesterday = dateFormat(yesterday);
 
     //Authorization
-    if (id != veryBasicDecryption(hash)) res.sendStatus(403);
+    if (id != veryBasicDecryption(hash)) {
+        res.sendStatus(403);
+        return;
+    }
 
     //Make queries into promises to resolve them all as one
     const yesterdayPromise = get(`SELECT ${table.returnFields.map( val => val.field + ' AS ' + val.as).join(', ')} FROM ${table.table} WHERE employee_id="${id}" AND DATE(${table.date})="${yesterday}" ${(table.additionalWhere.length) ? 'AND' : ''} ${table.additionalWhere.join(' AND ')};`, 'yesterday');
