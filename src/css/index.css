@@ -13,9 +13,9 @@ body {
 td[colspan] {
   text-align: center;
 }
-.MAS {
-  background-color: #efefef;
+.MAL {
+  border-left: 1px solid black;
 }
-.PDP {
-  background-color: white;
+.MAR {
+  border-right: 1px solid black;
 }

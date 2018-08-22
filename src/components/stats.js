@@ -4,9 +4,7 @@ import { Table } from 'reactstrap';
 class Stats extends Component {
     constructor(props) {
         super(props);
-        this.state = {
-
-        };
+        this.state = {};
     }
     render() {
         let conversions = this.props.getStats();
@@ -58,45 +56,47 @@ class Stats extends Component {
             return (
                 <tr>
                     <th scope="row">{attr}</th>
-                    <td className="MA">{ totalCalls(conversions[attr],      'MA')       }</td>
-                    <td className="MA">{ opportunities(conversions[attr],   'MA')       }</td>
-                    <td className="MA">{ enrollments(conversions[attr],     'MA', 'P')  }</td>
-                    <td className="MA">{ enrollments(conversions[attr],     'MA', 'M')  }</td>
-                    <td className="MA">{ homeVisits(conversions[attr])                  }</td>
-                    <td className="MA">{ lacb(conversions[attr])                        }</td>
-                    <td className="MA">{ conversionRate(conversions[attr],  'MA')       }</td>
-                    <td className="PDP">{ totalCalls(conversions[attr],     'PDP')      }</td>
-                    <td className="PDP">{ opportunities(conversions[attr],  'PDP')      }</td>
-                    <td className="PDP">{ enrollments(conversions[attr],    'PDP', 'P') }</td>
-                    <td className="PDP">{ enrollments(conversions[attr],    'PDP', 'M') }</td>
-                    <td className="PDP">{ conversionRate(conversions[attr], 'PDP')      }</td>
+                    <td className="MAL">
+                        { totalCalls(conversions[attr],     'MA')       }</td>
+                    <td>{ opportunities(conversions[attr],  'MA')       }</td>
+                    <td>{ enrollments(conversions[attr],    'MA', 'P')  }</td>
+                    <td>{ enrollments(conversions[attr],    'MA', 'M')  }</td>
+                    <td>{ homeVisits(conversions[attr])                  }</td>
+                    <td>{ lacb(conversions[attr])                        }</td>
+                    <td className="MAR">
+                        { conversionRate(conversions[attr], 'MA')       }</td>
+                    <td>{ totalCalls(conversions[attr],     'PDP')      }</td>
+                    <td>{ opportunities(conversions[attr],  'PDP')      }</td>
+                    <td>{ enrollments(conversions[attr],    'PDP', 'P') }</td>
+                    <td>{ enrollments(conversions[attr],    'PDP', 'M') }</td>
+                    <td>{ conversionRate(conversions[attr], 'PDP')      }</td>
                 </tr>
             );
         }
 
-        const isLoggedIn = (this.props.getLoggedIn()) ?
+        const table = (this.props.getLoggedIn()) ?
             (
                 <Table>
                     <thead>
                     <tr>
                         <td></td>
-                        <td className="MAS" colSpan="7">MA</td>
-                        <td className="PDP" colSpan="5">PDP</td>
+                        <td colSpan="7">MA</td>
+                        <td colSpan="5">PDP</td>
                     </tr>
                     <tr>
                         <th></th>
-                        <th className="MA">Calls</th>
-                        <th className="MA">Opportunities</th>
-                        <th className="MA">Enrollments</th>
-                        <th className="MA">Plan Changes</th>
-                        <th className="MA">HV</th>
-                        <th className="MA">LACB</th>
-                        <th className="MA">Conversion Rate</th>
-                        <th className="PDP">Calls</th>
-                        <th className="PDP">Opportunities</th>
-                        <th className="PDP">Enrollments</th>
-                        <th className="PDP">Plan Changes</th>
-                        <th className="PDP">Conversion %</th>
+                        <th className="MAL">Calls</th>
+                        <th>Opportunities</th>
+                        <th>Enrollments</th>
+                        <th>Plan Changes</th>
+                        <th>HV</th>
+                        <th>LACB</th>
+                        <th className="MAR">Conversion Rate</th>
+                        <th>Calls</th>
+                        <th>Opportunities</th>
+                        <th>Enrollments</th>
+                        <th>Plan Changes</th>
+                        <th>Conversion %</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -113,7 +113,7 @@ class Stats extends Component {
 
         return (
             <div id="stats">
-                { isLoggedIn }
+                { table }
             </div>
         );
     }

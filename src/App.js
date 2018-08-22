@@ -13,7 +13,7 @@ class App extends Component {
         this.setStats = this.setStats.bind(this);
         this.getStats = this.getStats.bind(this);
         this.state = {
-            loggedIn: false,
+            loggedIn: (sessionStorage.getItem('hash')) ? true : false,
             stats: []
         };
     }
@@ -45,7 +45,7 @@ class App extends Component {
                 .then( data => data.json() )
                 .then( function(stats){
                     console.log(stats);
-                    self.state.stats = stats;
+                    self.setState({stats: stats});
                 })
         }
     }
