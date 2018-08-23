@@ -9,7 +9,6 @@ Front End
     - Aetna
         - AEP % to goal per site
         - Separate Grand Prize per site/LoB
-            - 1 entry for every 5 New Enrollments (MA/PDP combined).
         - Spreadsheet with all agents’ stats reported near the end of AEP
             - Function that randomly draws winner of grand prize based on number of entries.
     - CareSource
