@@ -12,6 +12,7 @@ Front End
     - CareSource
         - Spreadsheet with all agents’ stats reported near the end of AEP
     - Anthem
+        - Figure out why Anthem /stats takes 6 seconds to download data from db
         - stats from yesterday, AEP-to-date, and today’s (live)
             - Enrollments – will be MAPD, PDP, AE, MS, Non-GI MS, total number of enrollments and completion percentage
             - HPA -- plan change
