@@ -12,19 +12,10 @@ Front End
     - CareSource
         - Spreadsheet with all agents’ stats reported near the end of AEP
     - Anthem
-        - Figure out why Anthem /stats takes 6 seconds to download data from db
-        - stats from yesterday, AEP-to-date, and today’s (live)
-            - Enrollments – will be MAPD, PDP, AE, MS, Non-GI MS, total number of enrollments and completion percentage
-            - HPA -- plan change
-                - Total number of quotes and conversion percentage (Quote ID Provided – Transfer to T3)
-            - T2 -- new enrollment
-                - Total number of quotes and conversion percentage (Quote ID Provided – Transfer to T3)
         - Grand Prize
-            - “Entries” into the drawings are 1 entry for every 10 T2 quotes, 1 entry for every 5 HPA quotes, and 1 entry for every 2 successfully submitted application.
-                - Potentially a timeframe each day for double entries (power hour)
             - The drawings we will need to have two ticket entry portions.
                 - The first one is going to be done on a weekly basis, just for weeks 3-6 of AEP (Oct. 14th – Nov. 10th),
-                - The second one will be an AEP to date.
+                    - Find a way to grab stats from a specific date.
 
 
 

@@ -31,26 +31,36 @@ class Stats extends Component {
         if (!stats) return 0;
         let result = null;
 
-        if (query === 'enrollments') result = stats.reduce((acc, call) => Number(call.product === product && call.callerType === callerType && call.enrollment === 1) + acc, 0);
-        else if (query === 'conversionRate') result = Number(stats.reduce((acc, call) => Number(call.product === product && call.callerType === 'P' && call.enrollment) + acc, 0) /
+        if (query === 'enrollments') result = stats.reduce((acc, call) => Number(call.product === product && call.callerType === callerType && call.enrollment) + acc, 0);
+        else if (query === 'conversionRate') result = Number( this.aetnaCaresourceQuery(stats, 'enrollments', product, 'P') /
             stats.reduce((acc, call) => Number(call.product === product && call.callerType === 'P' && call.opportunity === 1) + acc, 0) * 100).toFixed(2)
-        else if (query === 'rawConversionRate') result = Number(stats.reduce((acc, call) => Number(call.product === product && (call.hv === 1 || call.lacb || call.enrollment)) + acc, 0) /
-            stats.reduce((acc, call) => Number(call.product === product && call.opportunity === 1) + acc, 0) * 100).toFixed(2)
-        else if (query === 'homeVisits') result = stats.reduce((acc, call) => Number(call.hv === 1) + acc, 0);
-        else if (query === 'lacb') result = stats.reduce((acc, call) => Number(call.lacb === 1) + acc, 0);
+        else if (query === 'rawConversionRate') result = Number(stats.reduce((acc, call) => Number(call.product === product && (call.hv || call.lacb || call.enrollment)) + acc, 0) /
+            this.aetnaCaresourceQuery(stats, 'opportunities', product, 'P') * 100).toFixed(2)
+        else if (query === 'homeVisits') result = stats.reduce((acc, call) => Number(call.hv) + acc, 0);
+        else if (query === 'lacb') result = stats.reduce((acc, call) => Number(call.lacb) + acc, 0);
         else if (query === 'totalCalls') result = stats.reduce((acc, call) => Number(call.product === product) + acc, 0);
-        else if (query === 'opportunities') result = stats.reduce((acc, call) => Number(call.opportunity === 1 && call.product === product) + acc, 0);
+        else if (query === 'opportunities') result = stats.reduce((acc, call) => Number(call.opportunity && call.product === product) + acc, 0);
 
         if (result === null || isNaN(result) || result === undefined) return 0;
         return result;
     }
 
-    anthemQuery(stats, query){
+    anthemQuery(stats, query, product){
         //query is the type of data to extract from stats (e.g. enrollments, conversionRate, hv, lacb, etc.)
+        //product is any of these: mapd, pdp, ae, ms, ms non-gi
         if (!stats) return 0;
         let result = null;
+        const anthemProducts = ['ma', 'ms', 'ms non-gi', 'pdp', 'ae', 't2', 'hpa'];
 
-
+        if (query === 'totalCalls') result = stats.length;
+        else if (query === 'opportunities') result = stats.reduce((acc, call) => Number(call.opportunity && anthemProducts.reduce( (bool, prod) => Number(call.product.toLowerCase().includes(prod)) | bool, 0) ) + acc, 0);
+        else if (query === 'totalEnrollments') result = stats.reduce((acc, call) => Number((call.enrollment || call.conversion) && anthemProducts.reduce( (bool, prod) => Number(call.product.toLowerCase().includes(prod)) | bool, 0) ) + acc, 0);
+        else if (query === 'conversionRate') result = Number(this.anthemQuery(stats, 'totalEnrollments') / this.anthemQuery(stats, 'opportunities') * 100).toFixed(2);
+        else if (query === 'enrollments' && product === 'ms') {
+            result = stats.reduce((acc, call) => Number(call.product.toLowerCase().includes('ms') && (call.enrollment || call.conversion) ) + acc, 0) -
+                this.anthemQuery(stats, 'enrollments', 'ms non-gi');
+        }
+        else if (query === 'enrollments') result = stats.reduce((acc, call) => Number(call.product.toLowerCase().includes(product) && (call.enrollment || call.conversion) ) + acc, 0);
 
         if (result === null || isNaN(result) || result === undefined) return 0;
         return result;
@@ -101,21 +111,17 @@ class Stats extends Component {
                 <tr>
                     <th scope="row">{attr}</th>
                     <td className="MAL">
-                        { self.totalCalls(conversions[attr],     'MA')       }</td>
-                    <td>{ self.opportunities(conversions[attr],  'MA')       }</td>
-                    <td>{ self.enrollments(conversions[attr],    'MA', 'P')  }</td>
-                    <td>{ self.enrollments(conversions[attr],    'MA', 'M')  }</td>
-                    <td>{ self.homeVisits(conversions[attr])                 }</td>
-                    <td>{ self.lacb(conversions[attr])                       }</td>
-                    <td>{ self.rawConversionRate(conversions[attr], 'MA')    }</td>
-                    <td className="MAR">
-                        { self.conversionRate(conversions[attr], 'MA')       }</td>
-                    <td>{ self.totalCalls(conversions[attr],     'PDP')      }</td>
-                    <td>{ self.opportunities(conversions[attr],  'PDP')      }</td>
-                    <td>{ self.enrollments(conversions[attr],    'PDP', 'P') }</td>
-                    <td>{ self.enrollments(conversions[attr],    'PDP', 'M') }</td>
-                    <td>{ self.rawConversionRate(conversions[attr], 'PDP')   }</td>
-                    <td>{ self.conversionRate(conversions[attr], 'PDP')      }</td>
+                        { self.anthemQuery(conversions[attr], 'totalCalls',         'MA')       }</td>
+                    <td>{ self.anthemQuery(conversions[attr], 'opportunities',      'MA')       }</td>
+                    <td>{ self.anthemQuery(conversions[attr], 'totalEnrollments')  }</td>
+                    <td>{ self.anthemQuery(conversions[attr], 'enrollments',        't2')  }</td>
+                    <td>{ self.anthemQuery(conversions[attr], 'enrollments',        'hpa')                            }</td>
+                    <td>{ self.anthemQuery(conversions[attr], 'enrollments',        'ma')                            }</td>
+                    <td>{ self.anthemQuery(conversions[attr], 'enrollments',        'pdp')        }</td>
+                    <td>{ self.anthemQuery(conversions[attr], 'enrollments',        'ae')        }</td>
+                    <td>{ self.anthemQuery(conversions[attr], 'enrollments',        'ms')        }</td>
+                    <td>{ self.anthemQuery(conversions[attr], 'enrollments',        'ms non-gi')       }</td>
+                    <td>{ self.anthemQuery(conversions[attr], 'conversionRate',     'PDP')      }</td>
                 </tr>
             );
         }
@@ -224,31 +230,49 @@ class Stats extends Component {
                 <div>
                     <div id="generalStats" className="container row">
                         <div id="siteGoal" className="col-3 row" title="Your progress to reaching your site's goal for each agent during AEP">
-                            <div id="siteGoalBreakdown" className="col-8 row">
-                                <span className="col-6">MANE:</span>
-                                <span className="col-6">{ self.enrollments(conversions.aepToDate, 'MA', 'P') }</span>
-                                <br />
-                                <span className="col-6">Goal:</span>
-                                <span className="col-6">{ self.state.siteGoal[sessionStorage.getItem('client')][sessionStorage.getItem('site')] }</span>
+                            <div id="siteGoalBreakdown" className="col-9 row">
+                                <span className="col-7">Enrolled:</span>
+                                <span className="col-5">{ self.anthemQuery(conversions.aepToDate, 'totalEnrollments') }</span>
+                                <span className="col-7">Goal:</span>
+                                <span className="col-5">{ self.state.siteGoal[sessionStorage.getItem('client')][sessionStorage.getItem('site')] }</span>
                             </div>
-                            <span id="siteGoalPercent" className="col-4">
-                                { Number(self.enrollments(conversions.aepToDate, 'MA', 'P') /
+                            <span id="siteGoalPercent" className="col-3">
+                                { Number(self.anthemQuery(conversions.aepToDate, 'totalEnrollments') /
                                     self.state.siteGoal[sessionStorage.getItem('client')][sessionStorage.getItem('site')] * 100).toFixed(2)}%
                             </span>
                         </div>
-                        <div id="gpEntries" className="offset-1 col-3" title="Entries into Grand Prize raffle - 1 for every 5 MANE enrollments">
-                            Grand Prize Entries: { Math.floor(
-                            ( self.enrollments(conversions.aepToDate, 'MA', 'P')
-                                + self.enrollments(conversions.aepToDate, 'PDP', 'P') )
-                            / 5 // Every 5 new enrollments gives an entry to the gp drawing
-                        ) }
+                        <div id="gpEntries" className="offset-1 col-3 row" title="Entries into Grand Prize raffle - 1 for every 10 T2 quotes, 1 for every 5 HPA quotes, 1 for every 2 successful applications">
+                            <div className="col-8">
+                                <div>Grand Prize</div>
+                                <div>AEP Entries</div>
+                            </div>
+                            <div className="col-4 entryCount">{
+                                Math.floor( self.anthemQuery(conversions.aepToDate, 'enrollments', 't2')  / 10) +
+                                Math.floor( self.anthemQuery(conversions.aepToDate, 'enrollments', 'hpa') / 5) +
+                                Math.floor( (
+                                    self.anthemQuery(conversions.aepToDate, 'totalEnrollments') -
+                                    self.anthemQuery(conversions.aepToDate, 'enrollments', 't2') -
+                                    self.anthemQuery(conversions.aepToDate, 'enrollments', 'hpa')
+                                ) / 2)
+                            }
+                            </div>
                         </div>
-                        <div id="gpEntriesWeekly" className="offset-1 col-3" title="Entries into Grand Prize raffle - 1 for every 5 MANE enrollments">
-                            Grand Prize Entries: { Math.floor(
-                            ( self.enrollments(conversions.aepToDate, 'MA', 'P')
-                                + self.enrollments(conversions.aepToDate, 'PDP', 'P') )
-                            / 5 // Every 5 new enrollments gives an entry to the gp drawing
-                        ) }
+                        <div id="gpEntriesWeekly" className="offset-1 col-3 row" title="Entries into Grand Prize raffle - 1 for every 10 MANE enrollments">
+                            {/*TODO: make this based on last 7 days of calls*/}
+                            <div className="col-8">
+                                <div>Grand Prize</div>
+                                <div>Week Entries</div>
+                            </div>
+                            <div className="col-4 entryCount">{
+                                Math.floor( self.anthemQuery(conversions.aepToDate, 'enrollments', 't2')  / 10) +
+                                Math.floor( self.anthemQuery(conversions.aepToDate, 'enrollments', 'hpa') / 5) +
+                                Math.floor( (
+                                    self.anthemQuery(conversions.aepToDate, 'totalEnrollments') -
+                                    self.anthemQuery(conversions.aepToDate, 'enrollments', 't2') -
+                                    self.anthemQuery(conversions.aepToDate, 'enrollments', 'hpa')
+                                ) / 2)
+                            }
+                            </div>
                         </div>
                     </div>
                     <Table>
@@ -264,10 +288,7 @@ class Stats extends Component {
                             <th title="PDP Enrollments">PDP</th>
                             <th title="AE Enrollments">AE</th>
                             <th title="MS Enrollments">MS</th>
-                            <th title="Non-GI MS Enrollments">Non-GI MS</th>
-                            <th title="Home Visits">HV</th>
-                            <th title="Licensed Agent Callback">LACB</th>
-                            <th title="Raw Conversion Rate - all enrollments and leads divided by total opportunities">Raw Conv %</th>
+                            <th title="MS Non-GI Enrollments">MS Non-GI</th>
                             <th className="MAR" title="Conversion Rate - only enrollments over total opportunities">Conv %</th>
                         </tr>
                         </thead>

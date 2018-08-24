@@ -103,24 +103,22 @@ router.route('/stats/:client/:id').get(function(req, res){
     }
 
     //Make queries into promises to resolve them all as one
-    const yesterdayPromise = get(`SELECT ${table.returnFields.map( val => val.field + ' AS ' + val.as).join(', ')} FROM ${table.table} WHERE employee_id="${id}" AND DATE(${table.date})="${yesterday}";`, 'yesterday');
-    const aepToDatePromise = get(`SELECT ${table.returnFields.map( val => val.field + ' AS ' + val.as).join(', ')} FROM ${table.table} WHERE employee_id="${id}" AND DATE(${table.date}) > "${aepStartDate}";`, 'aepToDate');
-    const TodayPromise = get(`SELECT ${table.returnFields.map( val => val.field + ' AS ' + val.as, '').join(', ')} FROM ${table.table} WHERE employee_id="${id}" AND DATE(${table.date})=CURDATE();`, 'today');
+    const yesterdayPromise = get(`SELECT ${table.returnFields.map( val => val.field + ' AS ' + val.as).join(', ')} FROM ${table.table} WHERE employee_id="${id}" AND ${table.date} > "${yesterday}";`, 'yesterday');
+    const aepToDatePromise = get(`SELECT ${table.returnFields.map( val => val.field + ' AS ' + val.as).join(', ')} FROM ${table.table} WHERE employee_id="${id}" AND ${table.date} > "${aepStartDate}";`, 'aepToDate');
+    const TodayPromise = get(`SELECT ${table.returnFields.map( val => val.field + ' AS ' + val.as, '').join(', ')} FROM ${table.table} WHERE employee_id="${id}" AND ${table.date} > curdate();`, 'today');
+
     Promise.all([TodayPromise, yesterdayPromise, aepToDatePromise])
         .then( data => {
-            if (client.toLowerCase() === "anthem") {
-                for (let set of data) {
-                    set[Object.keys(set)[0]].forEach(function (el) {     //due to the data structure, we have to find the object attribute name to access the data
-                        //convert campaign_name into a valid product field
-                        if (el.product.includes('- MA')) el.product = "MA";
-                        else if (el.product.includes('- PDP')) el.product = "PDP";
-                        else el.product = "None";
-
-                        //convert call_termination_type HPA to plan change and T2 to New Enrollment
-
-                    })
-                }
-            }
+            // if (client.toLowerCase() === "anthem") {
+            //     for (let set of data) {
+            //         set[Object.keys(set)[0]].forEach(function (el) {     //due to the data structure, we have to find the object attribute name to access the data
+            //             //convert campaign_name into a valid product field
+            //             if (el.product.includes('- MA')) el.product = "MA";
+            //             else if (el.product.includes('- PDP')) el.product = "PDP";
+            //             else el.product = "None";
+            //         })
+            //     }
+            // }
 
             //Convert data array to an associative array
             let conversions = {};
