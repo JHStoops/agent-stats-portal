@@ -7,18 +7,18 @@ const TABLES = {
   aetna: {
       table: "convl.conversion_summary",
       date: "date",
-      returnFields: [{field: "product", as: "product"}, {field: "type", as: "callerType"}, {field: "enrollment", as: "enrollment"}, {field: "home_appt", as: "hv"}, {field: "lacb", as: "lacb"}, {field: "non_opp", as: "opportunity"}],
-      additionalWhere: []},
+      returnFields: [{field: "product", as: "product"}, {field: "type", as: "callerType"}, {field: "enrollment", as: "enrollment"}, {field: "home_appt", as: "hv"}, {field: "lacb", as: "lacb"}, {field: "non_opp", as: "opportunity"}]
+  },
   caresource: {
       table: "convl.caresource_conversion_summary",
       date: "interaction_date",
-      returnFields: [{field: "product", as: "product"}, {field: "type", as: "callerType"}, {field: "enrollment", as: "enrollment"}, {field: "home_appt", as: "hv"}, {field: "lacb", as: "lacb"}, {field: "opp", as: "opportunity"}],
-      additionalWhere: []},
+      returnFields: [{field: "product", as: "product"}, {field: "type", as: "callerType"}, {field: "enrollment", as: "enrollment"}, {field: "home_appt", as: "hv"}, {field: "lacb", as: "lacb"}, {field: "opp", as: "opportunity"}]
+  },
   anthem: {
       table: "convl.anthem_conversion_summary",
       date: "interaction_datetime",
-      returnFields: [{field: "campaign_name", as: "product"}, {field: "enrollment", as: "enrollment"}, {field: "conversion", as: "callerType"}, {field: "opportunity", as: "opportunity"}],
-      additionalWhere: ["campaign_id IN (898, 894, 671, 681, 894, 898, 641, 731, 701, 631, 741, 661, 651)"]},
+      returnFields: [{field: "interaction_datetime", as: "datetime"}, {field: "campaign_name", as: "product"}, {field: "call_termination_type", as: "dispo"}, {field: "enrollment", as: "enrollment"}, {field: "conversion", as: "conversion"}, {field: "opportunity", as: "opportunity"}]
+  },
   agentRoster: { table: "iex_data.nice_agentroster_table" },
   agentStag: { table: "iex_data.stag_adp_employeeinfo" }
 };
@@ -103,9 +103,9 @@ router.route('/stats/:client/:id').get(function(req, res){
     }
 
     //Make queries into promises to resolve them all as one
-    const yesterdayPromise = get(`SELECT ${table.returnFields.map( val => val.field + ' AS ' + val.as).join(', ')} FROM ${table.table} WHERE employee_id="${id}" AND DATE(${table.date})="${yesterday}" ${(table.additionalWhere.length) ? 'AND' : ''} ${table.additionalWhere.join(' AND ')};`, 'yesterday');
-    const aepToDatePromise = get(`SELECT ${table.returnFields.map( val => val.field + ' AS ' + val.as).join(', ')} FROM ${table.table} WHERE employee_id="${id}" AND DATE(${table.date}) > "${aepStartDate}" ${(table.additionalWhere.length) ? 'AND' : ''} ${table.additionalWhere.join(' AND ')};`, 'aepToDate');
-    const TodayPromise = get(`SELECT ${table.returnFields.map( val => val.field + ' AS ' + val.as, '').join(', ')} FROM ${table.table} WHERE employee_id="${id}" AND DATE(${table.date})=CURDATE() ${(table.additionalWhere.length) ? 'AND' : ''} ${table.additionalWhere.join(' AND ')};`, 'today');
+    const yesterdayPromise = get(`SELECT ${table.returnFields.map( val => val.field + ' AS ' + val.as).join(', ')} FROM ${table.table} WHERE employee_id="${id}" AND DATE(${table.date})="${yesterday}";`, 'yesterday');
+    const aepToDatePromise = get(`SELECT ${table.returnFields.map( val => val.field + ' AS ' + val.as).join(', ')} FROM ${table.table} WHERE employee_id="${id}" AND DATE(${table.date}) > "${aepStartDate}";`, 'aepToDate');
+    const TodayPromise = get(`SELECT ${table.returnFields.map( val => val.field + ' AS ' + val.as, '').join(', ')} FROM ${table.table} WHERE employee_id="${id}" AND DATE(${table.date})=CURDATE();`, 'today');
     Promise.all([TodayPromise, yesterdayPromise, aepToDatePromise])
         .then( data => {
             if (client.toLowerCase() === "anthem") {

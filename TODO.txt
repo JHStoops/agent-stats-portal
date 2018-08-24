@@ -7,15 +7,9 @@ Front End
     - if /login failed, display an error message
 - stats.js
     - Aetna
-        - AEP % to goal per site
-        - Separate Grand Prize per site/LoB
         - Spreadsheet with all agents’ stats reported near the end of AEP
-            - Function that randomly draws winner of grand prize based on number of entries.
+            - Function that randomly draws winner of grand prize based on number of entries. (one grand prize per site/LoB)
     - CareSource
-        - AEP % to goal per site
-        - stats from yesterday, AEP-to-date, and today’s (live)
-            -MANE - Total # of enrollments and Conversion% MANE/Total MA Prospect Calls.
-        - No Grand prize
         - Spreadsheet with all agents’ stats reported near the end of AEP
     - Anthem
         - stats from yesterday, AEP-to-date, and today’s (live)
