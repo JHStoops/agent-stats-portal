@@ -60,6 +60,7 @@ export default class TopNavbar extends React.Component {
                         sessionStorage.setItem('name', user.name);
                         sessionStorage.setItem('site', user.site);
                         sessionStorage.setItem('username', user.username);
+                        sessionStorage.setItem('licensed', user.licensed);
                         sessionStorage.setItem('hash', user.hash);
 
                         //fetch agent stats

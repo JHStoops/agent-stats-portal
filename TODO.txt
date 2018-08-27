@@ -12,6 +12,8 @@ Front End
     - CareSource
         - Spreadsheet with all agents’ stats reported near the end of AEP
     - Anthem
+        - figure out the enrollment vs conversion significance
+            - Should I display all enrollments/conversions, but only count the conversions for licensed and enrollments for unlicensed in the conversion rate?
         - Weekly Grand Prize -- just for weeks 3-6 of AEP (Oct. 14th – Nov. 10th)
             - Find a way to grab stats from a specific date.
                 - 10/14 - 10/20

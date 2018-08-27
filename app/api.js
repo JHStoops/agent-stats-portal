@@ -67,7 +67,7 @@ router.route('/login').post(function(req, res){
 
 router.route('/me').post(function(req, res){
     const query = `
-        SELECT stag.givenName AS name, stag.username, nice.mu AS client, nice.callpro_userid AS userid
+        SELECT stag.givenName AS name, stag.username, IF(stag.jobValue = "Licensed Healthcare Agent", true, false) AS licensed, nice.mu AS client, nice.callpro_userid AS userid
         FROM iex_data.stag_adp_employeeinfo AS stag, 
              iex_data.nice_agentroster_table AS nice 
         WHERE stag.positionStatusCode NOT IN ('T', 'D')

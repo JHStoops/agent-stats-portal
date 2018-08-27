@@ -62,17 +62,25 @@ class Stats extends Component {
         //product is any of these: mapd, pdp, ae, ms, ms non-gi
         if (!stats) return 0;
         let result = null;
-        const anthemProducts = ['ma', 'ms', 'ms non-gi', 'pdp', 'ae', 't2', 'hpa'];
+        const anthemProducts = ['ma', 'ms', 'ms non-gi', 'pdp', 'ae', 't2', 'hpa', 'dnsp', 'abcbs'];
+
+        function licensedVsUnlicensedCriteria(obj){
+            if (sessionStorage.getItem('licensed')) return obj.conversion;
+            return obj.enrollment;
+        }
 
         if (query === 'totalCalls') result = stats.length;
         else if (query === 'opportunities') result = stats.reduce((acc, call) => Number(call.opportunity && anthemProducts.reduce( (bool, prod) => Number(call.product.toLowerCase().includes(prod)) | bool, 0) ) + acc, 0);
-        else if (query === 'totalEnrollments') result = stats.reduce((acc, call) => Number((call.enrollment || call.conversion) && anthemProducts.reduce( (bool, prod) => Number(call.product.toLowerCase().includes(prod)) | bool, 0) ) + acc, 0);
-        else if (query === 'conversionRate') result = Number(this.anthemQuery(stats, 'totalEnrollments') / this.anthemQuery(stats, 'opportunities') * 100).toFixed(2);
+        else if (query === 'totalEnrollments') result = stats.reduce((acc, call) => Number(licensedVsUnlicensedCriteria(call) && anthemProducts.reduce( (bool, prod) => Number(call.product.toLowerCase().includes(prod)) | bool, 0) ) + acc, 0);
+        else if (query === 'conversionRate'){
+            if (sessionStorage.getItem('licensed')) result = Number(this.anthemQuery(stats, 'totalEnrollments') / this.anthemQuery(stats, 'opportunities') * 100).toFixed(2);
+            else result = Number(this.anthemQuery(stats, 'totalEnrollments') / this.anthemQuery(stats, 'opportunities') * 100).toFixed(2);
+        }
         else if (query === 'enrollments' && product === 'ms') {
-            result = stats.reduce((acc, call) => Number(call.product.toLowerCase().includes('ms') && (call.enrollment || call.conversion) ) + acc, 0) -
+            result = stats.reduce((acc, call) => Number(call.product.toLowerCase().includes('ms') && licensedVsUnlicensedCriteria(call) ) + acc, 0) -
                 this.anthemQuery(stats, 'enrollments', 'ms non-gi');
         }
-        else if (query === 'enrollments') result = stats.reduce((acc, call) => Number(call.product.toLowerCase().includes(product) && (call.enrollment || call.conversion) ) + acc, 0);
+        else if (query === 'enrollments') result = stats.reduce((acc, call) => Number(call.product.toLowerCase().includes(product) && licensedVsUnlicensedCriteria(call) ) + acc, 0);
 
         if (result === null || isNaN(result) || result === undefined) return 0;
         return result;
@@ -131,6 +139,8 @@ class Stats extends Component {
                     <td>{ self.anthemQuery(conversions[attr], 'enrollments',        'ae')        }</td>
                     <td>{ self.anthemQuery(conversions[attr], 'enrollments',        'ms')        }</td>
                     <td>{ self.anthemQuery(conversions[attr], 'enrollments',        'ms non-gi')       }</td>
+                    <td>{ self.anthemQuery(conversions[attr], 'enrollments',        'dnsp')       }</td>
+                    <td>{ self.anthemQuery(conversions[attr], 'enrollments',        'abcbs')       }</td>
                     <td>{ self.anthemQuery(conversions[attr], 'conversionRate',     'PDP')      }</td>
                 </tr>
             );
@@ -316,6 +326,8 @@ class Stats extends Component {
                             <th title="AE Enrollments">AE</th>
                             <th title="MS Enrollments">MS</th>
                             <th title="MS Non-GI Enrollments">MS Non-GI</th>
+                            <th title="DNSP Enrollments">DNSP</th>
+                            <th title="ABCBS Non-GI Enrollments">ABCBS</th>
                             <th className="MAR" title="Conversion Rate - only enrollments over total opportunities">Conv %</th>
                         </tr>
                         </thead>
