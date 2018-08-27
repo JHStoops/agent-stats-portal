@@ -8,11 +8,20 @@ class Stats extends Component {
             loggedId: this.props.getLoggedIn,
             siteGoal: {
                 'Aetna': {
-                    'Provo': 250,
-                    'Salt Lake City': 350,
-                    'Sawgrass': 215,
-                    'San Antonio': 180,
-                    'Memphis': 170
+                    'MANE': {
+                        'Provo': 23,
+                        'Salt Lake City': 3,
+                        'Sawgrass': 48,
+                        'San Antonio': 21,
+                        'Memphis': 2
+                    },
+                    'PDPNE': {
+                        'Provo': 97,
+                        'Salt Lake City': 160,
+                        'Sawgrass': 10,
+                        'San Antonio': 5,
+                        'Memphis': 71
+                    }
                 },
                 'Anthem': {
                     'San Antonio': 120,
@@ -20,7 +29,9 @@ class Stats extends Component {
                     'Sawgrass': 150
                 },
                 'Caresource': {
-                    'Salt Lake City': 120
+                    'MANE': {
+                        'Salt Lake City': 48
+                    }
                 }
             }
         };
@@ -32,10 +43,11 @@ class Stats extends Component {
         let result = null;
 
         if (query === 'enrollments') result = stats.reduce((acc, call) => Number(call.product === product && call.callerType === callerType && call.enrollment) + acc, 0);
+        // Enrollment Conversion Rate = total new enrollments / total calls with prospects. We do not separate out opportunity or non-opportunity
         else if (query === 'conversionRate') result = Number( this.aetnaCaresourceQuery(stats, 'enrollments', product, 'P') /
-            stats.reduce((acc, call) => Number(call.product === product && call.callerType === 'P' && call.opportunity === 1) + acc, 0) * 100).toFixed(2)
-        else if (query === 'rawConversionRate') result = Number(stats.reduce((acc, call) => Number(call.product === product && (call.hv || call.lacb || call.enrollment)) + acc, 0) /
-            this.aetnaCaresourceQuery(stats, 'opportunities', product, 'P') * 100).toFixed(2)
+            stats.reduce((acc, call) => Number(call.product === product && call.callerType === 'P') + acc, 0) * 100).toFixed(2);
+        else if (query === 'rawConversionRate') result = Number(stats.reduce((acc, call) => Number(call.product === product && call.callerType === 'P' && (call.hv || call.lacb || call.enrollment)) + acc, 0) /
+            stats.reduce((acc, call) => Number(call.product === product && call.callerType === 'P') + acc, 0) * 100).toFixed(2);
         else if (query === 'homeVisits') result = stats.reduce((acc, call) => Number(call.hv) + acc, 0);
         else if (query === 'lacb') result = stats.reduce((acc, call) => Number(call.lacb) + acc, 0);
         else if (query === 'totalCalls') result = stats.reduce((acc, call) => Number(call.product === product) + acc, 0);
@@ -76,7 +88,7 @@ class Stats extends Component {
                     <th scope="row">{attr}</th>
                     <td className="MAL">
                         { self.aetnaCaresourceQuery(conversions[attr], 'totalCalls',        'MA')       }</td>
-                    <td>{ self.aetnaCaresourceQuery(conversions[attr], 'opportunities',     'MA')       }</td>
+                    {/*<td>{ self.aetnaCaresourceQuery(conversions[attr], 'opportunities',     'MA')       }</td>*/}
                     <td>{ self.aetnaCaresourceQuery(conversions[attr], 'enrollments',       'MA', 'P')  }</td>
                     <td>{ self.aetnaCaresourceQuery(conversions[attr], 'enrollments',       'MA', 'M')  }</td>
                     <td>{ self.aetnaCaresourceQuery(conversions[attr], 'homeVisits')                    }</td>
@@ -85,10 +97,9 @@ class Stats extends Component {
                     <td className="MAR">
                         { self.aetnaCaresourceQuery(conversions[attr], 'conversionRate',    'MA')       }</td>
                     <td>{ self.aetnaCaresourceQuery(conversions[attr], 'totalCalls',        'PDP')      }</td>
-                    <td>{ self.aetnaCaresourceQuery(conversions[attr], 'opportunities',     'PDP')      }</td>
+                    {/*<td>{ self.aetnaCaresourceQuery(conversions[attr], 'opportunities',     'PDP')      }</td>*/}
                     <td>{ self.aetnaCaresourceQuery(conversions[attr], 'enrollments',       'PDP', 'P') }</td>
                     <td>{ self.aetnaCaresourceQuery(conversions[attr], 'enrollments',       'PDP', 'M') }</td>
-                    <td>{ self.aetnaCaresourceQuery(conversions[attr], 'rawConversionRate', 'PDP')      }</td>
                     <td>{ self.aetnaCaresourceQuery(conversions[attr], 'conversionRate',    'PDP')      }</td>
                 </tr>
             );
@@ -98,11 +109,10 @@ class Stats extends Component {
                     <th scope="row">{attr}</th>
                     <td className="MAL">
                         { self.aetnaCaresourceQuery(conversions[attr], 'totalCalls',     'MA')       }</td>
-                    <td>{ self.aetnaCaresourceQuery(conversions[attr], 'opportunities',  'MA')       }</td>
+                    {/*<td>{ self.aetnaCaresourceQuery(conversions[attr], 'opportunities',  'MA')       }</td>*/}
                     <td>{ self.aetnaCaresourceQuery(conversions[attr], 'enrollments',    'MA', 'P')  }</td>
                     <td>{ self.aetnaCaresourceQuery(conversions[attr], 'homeVisits')                 }</td>
                     <td>{ self.aetnaCaresourceQuery(conversions[attr], 'lacb')                       }</td>
-                    <td>{ self.aetnaCaresourceQuery(conversions[attr], 'rawConversionRate', 'MA')    }</td>
                     <td>{ self.aetnaCaresourceQuery(conversions[attr], 'conversionRate', 'MA')       }</td>
                 </tr>
             );
@@ -132,17 +142,30 @@ class Stats extends Component {
             if (sessionStorage.getItem('client') === 'Aetna') return (
                 <div>
                     <div id="generalStats" className="container row">
-                        <div id="siteGoal" className="col-3 row" title="Your progress to reaching your site's goal for each agent during AEP">
-                            <div id="siteGoalBreakdown" className="col-8 row">
-                                <span className="col-6">MANE:</span>
-                                <span className="col-6">{ self.aetnaCaresourceQuery(conversions.aepToDate, 'enrollments', 'MA', 'P') }</span>
+                        <div id="maneGoal" className="col-3 row" title="Your progress to reaching your site's MANE goal for individual agents during AEP">
+                            <div className="col-8 row goalBreakdown">
+                                <span className="col-8">MANE:</span>
+                                <span className="col-4">{ self.aetnaCaresourceQuery(conversions.aepToDate, 'enrollments', 'MA', 'P') }</span>
                                 <br />
-                                <span className="col-6">Goal:</span>
-                                <span className="col-6">{ self.state.siteGoal[sessionStorage.getItem('client')][sessionStorage.getItem('site')] }</span>
+                                <span className="col-8">Goal:</span>
+                                <span className="col-4">{ self.state.siteGoal[sessionStorage.getItem('client')]['MANE'][sessionStorage.getItem('site')] }</span>
                             </div>
                             <span id="siteGoalPercent" className="col-4">
                                 { Number(self.aetnaCaresourceQuery(conversions.aepToDate, 'enrollments', 'MA', 'P') /
-                                    self.state.siteGoal[sessionStorage.getItem('client')][sessionStorage.getItem('site')] * 100).toFixed(2)}%
+                                    self.state.siteGoal[sessionStorage.getItem('client')]['MANE'][sessionStorage.getItem('site')] * 100).toFixed(2)}%
+                            </span>
+                        </div>
+                        <div id="pdpneGoal" className="offset-1 col-3 row" title="Your progress to reaching your site's PDPNE goal for individual agents during AEP">
+                            <div className="col-8 row goalBreakdown">
+                                <span className="col-8">PDPNE:</span>
+                                <span className="col-4">{ self.aetnaCaresourceQuery(conversions.aepToDate, 'enrollments', 'PDP', 'P') }</span>
+                                <br />
+                                <span className="col-8">Goal:</span>
+                                <span className="col-4">{ self.state.siteGoal[sessionStorage.getItem('client')]['PDPNE'][sessionStorage.getItem('site')] }</span>
+                            </div>
+                            <span id="siteGoalPercent" className="col-4">
+                                { Number(self.aetnaCaresourceQuery(conversions.aepToDate, 'enrollments', 'PDP', 'P') /
+                                    self.state.siteGoal[sessionStorage.getItem('client')]['PDPNE'][sessionStorage.getItem('site')] * 100).toFixed(2)}%
                             </span>
                         </div>
                         <div id="gpEntries" className="offset-1 col-3 row" title="Entries into Grand Prize raffle - 1 for every 5 MANE enrollments">
@@ -163,25 +186,24 @@ class Stats extends Component {
                         <thead>
                         <tr>
                             <td></td>
-                            <td colSpan="8">MA</td>
-                            <td colSpan="6">PDP</td>
+                            <td colSpan="7">MA</td>
+                            <td colSpan="5">PDP</td>
                         </tr>
                         <tr>
                             <th></th>
                             <th className="MAL" title="Total Calls">Calls</th>
-                            <th title="Calls with opportunity of conversion">Opportunities</th>
+                            {/*<th title="Calls with opportunity of conversion">Opportunities</th>*/}
                             <th title="New Enrollments of prospects">NE</th>
                             <th title="Plan Change for current members">PC</th>
                             <th title="Home Visits">HV</th>
                             <th title="Licensed Agent Callback">LACB</th>
-                            <th title="Raw Conversion Rate - all enrollments and leads divided by total opportunities">Raw Conv %</th>
-                            <th className="MAR" title="Conversion Rate - only new enrollments over opportunities">Conv %</th>
+                            <th title="Raw Conversion Rate - all prospect enrollments and leads divided by total prospect calls">Raw Conv %</th>
+                            <th className="MAR" title="Conversion Rate - only new enrollments over prospect calls">Conv %</th>
                             <th title="Total Calls">Calls</th>
-                            <th title="Calls with opportunity of conversion">Opportunities</th>
+                            {/*<th title="Calls with opportunity of conversion">Opportunities</th>*/}
                             <th title="New Enrollments of prospects">NE</th>
                             <th title="Plan Change for current members">PC</th>
-                            <th title="Raw Conversion Rate - all enrollments and leads divided by total opportunities">Raw Conv %</th>
-                            <th title="Conversion Rate - only new enrollments over opportunities">Conversion %</th>
+                            <th title="Conversion Rate - only prospect enrollments over prospect calls">Conv %</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -202,11 +224,11 @@ class Stats extends Component {
                                 <span className="col-6">{ self.aetnaCaresourceQuery(conversions.aepToDate, 'enrollments', 'MA', 'P') }</span>
                                 <br />
                                 <span className="col-6">Goal:</span>
-                                <span className="col-6">{ self.state.siteGoal[sessionStorage.getItem('client')][sessionStorage.getItem('site')] }</span>
+                                <span className="col-6">{ self.state.siteGoal[sessionStorage.getItem('client')]['MANE'][sessionStorage.getItem('site')] }</span>
                             </div>
                             <span id="siteGoalPercent" className="col-4">
                                 { Number(self.aetnaCaresourceQuery(conversions.aepToDate, 'enrollments', 'MA', 'P') /
-                                    self.state.siteGoal[sessionStorage.getItem('client')][sessionStorage.getItem('site')] * 100).toFixed(2)}%
+                                    self.state.siteGoal[sessionStorage.getItem('client')]['MANE'][sessionStorage.getItem('site')] * 100).toFixed(2)}%
                             </span>
                         </div>
                     </div>
@@ -215,12 +237,11 @@ class Stats extends Component {
                         <tr>
                             <th></th>
                             <th className="MAL" title="Total Calls">Calls</th>
-                            <th title="Calls with opportunity of conversion">Opportunities</th>
-                            <th title="New Enrollments of prospects">NE</th>
-                            <th title="Home Visits">HV</th>
+                            {/*<th title="Calls with opportunity of conversion">Opportunities</th>*/}
+                            <th title="New Enrollments of prospects">New Enrollments</th>
+                            <th title="Home Visits">Home Visits</th>
                             <th title="Licensed Agent Callback">LACB</th>
-                            <th title="Raw Conversion Rate - all enrollments and leads divided by total opportunities">Raw Conv %</th>
-                            <th className="MAR" title="Conversion Rate - only new enrollments over opportunities">Conv %</th>
+                            <th className="MAR" title="Conversion Rate - only new enrollments over prospect calls">Conversion Rate</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -235,19 +256,19 @@ class Stats extends Component {
             else if (sessionStorage.getItem('client') === 'Anthem') return (
                 <div>
                     <div id="generalStats" className="container row">
-                        <div id="siteGoal" className="col-3 row" title="Your progress to reaching your site's goal for each agent during AEP">
-                            <div id="siteGoalBreakdown" className="col-9 row">
-                                <span className="col-7">Enrolled:</span>
-                                <span className="col-5">{ self.anthemQuery(conversions.aepToDate, 'totalEnrollments') }</span>
-                                <span className="col-7">Goal:</span>
-                                <span className="col-5">{ self.state.siteGoal[sessionStorage.getItem('client')][sessionStorage.getItem('site')] }</span>
-                            </div>
-                            <span id="siteGoalPercent" className="col-3">
-                                { Number(self.anthemQuery(conversions.aepToDate, 'totalEnrollments') /
-                                    self.state.siteGoal[sessionStorage.getItem('client')][sessionStorage.getItem('site')] * 100).toFixed(2)}%
-                            </span>
-                        </div>
-                        <div id="gpEntries" className="offset-1 col-3 row" title="Entries into Grand Prize raffle - 1 for every 10 T2 quotes, 1 for every 5 HPA quotes, 1 for every 2 successful applications">
+                        {/*<div id="siteGoal" className="col-3 row" title="Your progress to reaching your site's goal for each agent during AEP">*/}
+                            {/*<div id="siteGoalBreakdown" className="col-9 row">*/}
+                                {/*<span className="col-7">Enrolled:</span>*/}
+                                {/*<span className="col-5">{ self.anthemQuery(conversions.aepToDate, 'totalEnrollments') }</span>*/}
+                                {/*<span className="col-7">Goal:</span>*/}
+                                {/*<span className="col-5">{ self.state.siteGoal[sessionStorage.getItem('client')][sessionStorage.getItem('site')] }</span>*/}
+                            {/*</div>*/}
+                            {/*<span id="siteGoalPercent" className="col-3">*/}
+                                {/*{ Number(self.anthemQuery(conversions.aepToDate, 'totalEnrollments') /*/}
+                                    {/*self.state.siteGoal[sessionStorage.getItem('client')][sessionStorage.getItem('site')] * 100).toFixed(2)}%*/}
+                            {/*</span>*/}
+                        {/*</div>*/}
+                        <div id="gpEntries" className="col-3 row" title="Entries into Grand Prize raffle - 1 for every 10 T2 quotes, 1 for every 5 HPA quotes, 1 for every 2 successful applications">
                             <div className="col-8">
                                 <div>Grand Prize</div>
                                 <div>AEP Entries</div>

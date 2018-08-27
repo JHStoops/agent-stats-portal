@@ -21,7 +21,7 @@ td[colspan] {
 #generalStats {
   margin: 20px 0;
 }
-#siteGoalBreakdown, #gpEntries, #gpEntriesWeekly {
+#siteGoalBreakdown, .goalBreakdown, #gpEntries, #gpEntriesWeekly {
   font-size: 20px;
 }
 #siteGoalPercent, .entryCount {
