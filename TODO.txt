@@ -12,10 +12,14 @@ Front End
     - CareSource
         - Spreadsheet with all agents’ stats reported near the end of AEP
     - Anthem
-        - Grand Prize
-            - The drawings we will need to have two ticket entry portions.
-                - The first one is going to be done on a weekly basis, just for weeks 3-6 of AEP (Oct. 14th – Nov. 10th),
-                    - Find a way to grab stats from a specific date.
+        - Weekly Grand Prize -- just for weeks 3-6 of AEP (Oct. 14th – Nov. 10th)
+            - Find a way to grab stats from a specific date.
+                - 10/14 - 10/20
+                - 10/21 - 10/27
+                - 10/28 - 11/3
+                - 11/4  - 11/10
+        - Power hour
+            - Grab timestamps from each call to assign it double value toward entries
 
 
 

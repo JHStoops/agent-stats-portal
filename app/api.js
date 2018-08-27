@@ -91,7 +91,7 @@ router.route('/stats/:client/:id').get(function(req, res){
     const client = req.params.client.toLowerCase();
     const hash = req.headers['x-authentication'];
     const table = TABLES[client];
-    const aepStartDate = '2018-07-01';  //TODO: update this to actual first day -- set for testing value
+    const aepStartDate = '2018-08-01';  //TODO: update this to actual first day -- set for testing value
     let yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     yesterday = dateFormat(yesterday);
@@ -109,17 +109,6 @@ router.route('/stats/:client/:id').get(function(req, res){
 
     Promise.all([TodayPromise, yesterdayPromise, aepToDatePromise])
         .then( data => {
-            // if (client.toLowerCase() === "anthem") {
-            //     for (let set of data) {
-            //         set[Object.keys(set)[0]].forEach(function (el) {     //due to the data structure, we have to find the object attribute name to access the data
-            //             //convert campaign_name into a valid product field
-            //             if (el.product.includes('- MA')) el.product = "MA";
-            //             else if (el.product.includes('- PDP')) el.product = "PDP";
-            //             else el.product = "None";
-            //         })
-            //     }
-            // }
-
             //Convert data array to an associative array
             let conversions = {};
             for (let i = 0; i < data.length; i++) Object.assign(conversions, data[i])

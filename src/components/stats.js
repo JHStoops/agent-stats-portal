@@ -145,12 +145,18 @@ class Stats extends Component {
                                     self.state.siteGoal[sessionStorage.getItem('client')][sessionStorage.getItem('site')] * 100).toFixed(2)}%
                             </span>
                         </div>
-                        <div id="gpEntries" className="offset-1 col-5" title="Entries into Grand Prize raffle - 1 for every 5 MANE enrollments">
-                            Grand Prize Entries: { Math.floor(
-                            ( self.aetnaCaresourceQuery(conversions.aepToDate, 'enrollments', 'MA', 'P')
-                                + self.aetnaCaresourceQuery(conversions.aepToDate, 'enrollments', 'PDP', 'P') )
-                            / 5 // Every 5 new enrollments gives an entry to the gp drawing
-                        ) }
+                        <div id="gpEntries" className="offset-1 col-3 row" title="Entries into Grand Prize raffle - 1 for every 5 MANE enrollments">
+                            <div className="col-8">
+                                <div>Grand Prize</div>
+                                <div>AEP Entries</div>
+                            </div>
+                            <div className="col-4 entryCount">{
+                                Math.floor( (
+                                    self.aetnaCaresourceQuery(conversions.aepToDate, 'enrollments', 'MA', 'P')
+                                    + self.aetnaCaresourceQuery(conversions.aepToDate, 'enrollments', 'PDP', 'P') )
+                                    / 5) // Every 5 new enrollments gives an entry to the gp drawing)
+                            }
+                            </div>
                         </div>
                     </div>
                     <Table>

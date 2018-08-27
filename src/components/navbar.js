@@ -114,7 +114,7 @@ export default class TopNavbar extends React.Component {
         return (
             <div id="navbar">
                 <Navbar color="light" light expand="md">
-                    <NavbarBrand href="/"><img src={ (['Aetna'].includes(sessionStorage.getItem('client')) ) ? "/public/ELEVATE4.4.png" : "/public/cXp_Logo.png"} width="108" height="80" alt="AEP 2018 Agent Stats Portal"/></NavbarBrand>
+                    <NavbarBrand href="/"><img src={ (['Aetna', 'Caresource'].includes(sessionStorage.getItem('client')) ) ? "/public/ELEVATE4.4.png" : "/public/cXp_Logo.png"} width="108" height="80" alt="AEP 2018 Agent Stats Portal"/></NavbarBrand>
                     <NavbarToggler onClick={this.toggle} />
                     <Collapse isOpen={this.state.isOpen} navbar>
                         <Nav className="ml-auto" navbar>
