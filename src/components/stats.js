@@ -51,7 +51,6 @@ class Stats extends Component {
         else if (query === 'homeVisits') result = stats.reduce((acc, call) => Number(call.hv) + acc, 0);
         else if (query === 'lacb') result = stats.reduce((acc, call) => Number(call.lacb) + acc, 0);
         else if (query === 'totalCalls') result = stats.reduce((acc, call) => Number(call.product === product) + acc, 0);
-        else if (query === 'opportunities') result = stats.reduce((acc, call) => Number(call.opportunity && call.product === product) + acc, 0);
 
         if (result === null || isNaN(result) || result === undefined) return 0;
         return result;
@@ -65,8 +64,8 @@ class Stats extends Component {
         const anthemProducts = ['ma', 'ms', 'ms non-gi', 'pdp', 'ae', 't2', 'hpa', 'dnsp', 'abcbs'];
 
         function licensedVsUnlicensedCriteria(obj){
-            if (sessionStorage.getItem('licensed')) return obj.conversion;
-            return obj.enrollment;
+            if (Number(sessionStorage.getItem('licensed')) === 1) return obj.conversion;    //if licensed
+            return obj.enrollment;                                                          //if unlicensed
         }
 
         if (query === 'totalCalls') result = stats.length;
@@ -96,7 +95,6 @@ class Stats extends Component {
                     <th scope="row">{attr}</th>
                     <td className="MAL">
                         { self.aetnaCaresourceQuery(conversions[attr], 'totalCalls',        'MA')       }</td>
-                    {/*<td>{ self.aetnaCaresourceQuery(conversions[attr], 'opportunities',     'MA')       }</td>*/}
                     <td>{ self.aetnaCaresourceQuery(conversions[attr], 'enrollments',       'MA', 'P')  }</td>
                     <td>{ self.aetnaCaresourceQuery(conversions[attr], 'enrollments',       'MA', 'M')  }</td>
                     <td>{ self.aetnaCaresourceQuery(conversions[attr], 'homeVisits')                    }</td>
@@ -105,7 +103,6 @@ class Stats extends Component {
                     <td className="MAR">
                         { self.aetnaCaresourceQuery(conversions[attr], 'conversionRate',    'MA')       }</td>
                     <td>{ self.aetnaCaresourceQuery(conversions[attr], 'totalCalls',        'PDP')      }</td>
-                    {/*<td>{ self.aetnaCaresourceQuery(conversions[attr], 'opportunities',     'PDP')      }</td>*/}
                     <td>{ self.aetnaCaresourceQuery(conversions[attr], 'enrollments',       'PDP', 'P') }</td>
                     <td>{ self.aetnaCaresourceQuery(conversions[attr], 'enrollments',       'PDP', 'M') }</td>
                     <td>{ self.aetnaCaresourceQuery(conversions[attr], 'conversionRate',    'PDP')      }</td>
@@ -117,7 +114,6 @@ class Stats extends Component {
                     <th scope="row">{attr}</th>
                     <td className="MAL">
                         { self.aetnaCaresourceQuery(conversions[attr], 'totalCalls',     'MA')       }</td>
-                    {/*<td>{ self.aetnaCaresourceQuery(conversions[attr], 'opportunities',  'MA')       }</td>*/}
                     <td>{ self.aetnaCaresourceQuery(conversions[attr], 'enrollments',    'MA', 'P')  }</td>
                     <td>{ self.aetnaCaresourceQuery(conversions[attr], 'homeVisits')                 }</td>
                     <td>{ self.aetnaCaresourceQuery(conversions[attr], 'lacb')                       }</td>
@@ -202,7 +198,6 @@ class Stats extends Component {
                         <tr>
                             <th></th>
                             <th className="MAL" title="Total Calls">Calls</th>
-                            {/*<th title="Calls with opportunity of conversion">Opportunities</th>*/}
                             <th title="New Enrollments of prospects">NE</th>
                             <th title="Plan Change for current members">PC</th>
                             <th title="Home Visits">HV</th>
@@ -210,7 +205,6 @@ class Stats extends Component {
                             <th title="Raw Conversion Rate - all prospect enrollments and leads divided by total prospect calls">Raw Conv %</th>
                             <th className="MAR" title="Conversion Rate - only new enrollments over prospect calls">Conv %</th>
                             <th title="Total Calls">Calls</th>
-                            {/*<th title="Calls with opportunity of conversion">Opportunities</th>*/}
                             <th title="New Enrollments of prospects">NE</th>
                             <th title="Plan Change for current members">PC</th>
                             <th title="Conversion Rate - only prospect enrollments over prospect calls">Conv %</th>
@@ -266,18 +260,6 @@ class Stats extends Component {
             else if (sessionStorage.getItem('client') === 'Anthem') return (
                 <div>
                     <div id="generalStats" className="container row">
-                        {/*<div id="siteGoal" className="col-3 row" title="Your progress to reaching your site's goal for each agent during AEP">*/}
-                            {/*<div id="siteGoalBreakdown" className="col-9 row">*/}
-                                {/*<span className="col-7">Enrolled:</span>*/}
-                                {/*<span className="col-5">{ self.anthemQuery(conversions.aepToDate, 'totalEnrollments') }</span>*/}
-                                {/*<span className="col-7">Goal:</span>*/}
-                                {/*<span className="col-5">{ self.state.siteGoal[sessionStorage.getItem('client')][sessionStorage.getItem('site')] }</span>*/}
-                            {/*</div>*/}
-                            {/*<span id="siteGoalPercent" className="col-3">*/}
-                                {/*{ Number(self.anthemQuery(conversions.aepToDate, 'totalEnrollments') /*/}
-                                    {/*self.state.siteGoal[sessionStorage.getItem('client')][sessionStorage.getItem('site')] * 100).toFixed(2)}%*/}
-                            {/*</span>*/}
-                        {/*</div>*/}
                         <div id="gpEntries" className="col-3 row" title="Entries into Grand Prize raffle - 1 for every 10 T2 quotes, 1 for every 5 HPA quotes, 1 for every 2 successful applications">
                             <div className="col-8">
                                 <div>Grand Prize</div>

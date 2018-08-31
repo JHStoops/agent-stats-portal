@@ -117,3 +117,14 @@ router.route('/stats/:client/:id').get(function(req, res){
         })
         .catch( err => console.log(err) );
 });
+
+router.route('/stats/:client/:site/:startDate/:endDate').get(function(req, res){
+    //Grab all stats for a client by site
+    const client = req.params.client.toLowerCase();
+    const site = req.params.site.toLowerCase();
+    const startDate = req.params.startDate.toLowerCase();
+    const endDate = req.params.endDate.toLowerCase();
+    const table = TABLES[client];
+
+    const query = `SELECT ${table.returnFields.map( val => 'count(' + val.field + ') AS ' + val.as).join(', ')} FROM ${table.table} WHERE `;
+});
