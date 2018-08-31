@@ -8,18 +8,15 @@ Front End
 - stats.js
     - Aetna
         - Spreadsheet with all agents’ stats reported near the end of AEP
+            - Implement the endpoint for gathering stats from a client at a site within a time range
             - Function that randomly draws winner of grand prize based on number of entries. (one grand prize per site/LoB)
     - CareSource
         - Spreadsheet with all agents’ stats reported near the end of AEP
+            - Implement the endpoint for gathering stats from a client at a site within a time range
     - Anthem
         - Don't base enrollment on campaign name if dispo has a different product in its name
         - Do base enrollment on campaign name if dispo doesn't have a different product in its name
-        - Weekly Grand Prize -- just for weeks 3-6 of AEP (Oct. 14th – Nov. 10th)
-            - Find a way to grab stats from a specific date.
-                - 10/14 - 10/20
-                - 10/21 - 10/27
-                - 10/28 - 11/3
-                - 11/4  - 11/10
+        - Implement the endpoint for gathering stats from a client at a site within a time range
         - Power hour
             - Grab timestamps from each call to assign it double value toward entries
 
