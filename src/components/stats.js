@@ -58,7 +58,7 @@ class Stats extends Component {
 
     anthemQuery(stats, query, product){
         //query is the type of data to extract from stats (e.g. enrollments, conversionRate, hv, lacb, etc.)
-        //product is any of these: mapd, pdp, ae, ms, ms non-gi
+        //product is any of these: ma, pdp, ae, ms, ms non-gi, t2, hpa, dnsp, abcbs
         if (!stats) return 0;
         let result = null;
         const anthemProducts = ['ma', 'ms', 'ms non-gi', 'pdp', 'ae', 't2', 'hpa', 'dnsp', 'abcbs'];
@@ -71,10 +71,7 @@ class Stats extends Component {
         if (query === 'totalCalls') result = stats.length;
         else if (query === 'opportunities') result = stats.reduce((acc, call) => Number(call.opportunity && anthemProducts.reduce( (bool, prod) => Number(call.product.toLowerCase().includes(prod)) | bool, 0) ) + acc, 0);
         else if (query === 'totalEnrollments') result = stats.reduce((acc, call) => Number(licensedVsUnlicensedCriteria(call) && anthemProducts.reduce( (bool, prod) => Number(call.product.toLowerCase().includes(prod)) | bool, 0) ) + acc, 0);
-        else if (query === 'conversionRate'){
-            if (sessionStorage.getItem('licensed')) result = Number(this.anthemQuery(stats, 'totalEnrollments') / this.anthemQuery(stats, 'opportunities') * 100).toFixed(2);
-            else result = Number(this.anthemQuery(stats, 'totalEnrollments') / this.anthemQuery(stats, 'opportunities') * 100).toFixed(2);
-        }
+        else if (query === 'conversionRate') result = Number(this.anthemQuery(stats, 'totalEnrollments') / this.anthemQuery(stats, 'opportunities') * 100).toFixed(2);
         else if (query === 'enrollments' && product === 'ms') {
             result = stats.reduce((acc, call) => Number(call.product.toLowerCase().includes('ms') && licensedVsUnlicensedCriteria(call) ) + acc, 0) -
                 this.anthemQuery(stats, 'enrollments', 'ms non-gi');
@@ -87,6 +84,19 @@ class Stats extends Component {
 
     render() {
         let conversions = this.props.getStats();
+        let weekly = this.props.getWeekly();
+        let weeklyDrawings = function() {
+            const product = Math.floor( Number(weekly.t2)  / 10) +
+            Math.floor( Number(weekly.hpa) / 5) +
+            Math.floor(
+                Number(weekly.totalEnrollments) -
+                Number(weekly.t2) -
+                Number(weekly.hpa)
+            ) / 2;
+
+            return (isNaN(product)) ? 0 : product;
+
+        };
         const self = this;
 
         function stats(attr) {
@@ -140,6 +150,27 @@ class Stats extends Component {
                     <td>{ self.anthemQuery(conversions[attr], 'conversionRate',     'PDP')      }</td>
                 </tr>
             );
+        }
+
+        function weeklyStats() {
+            return (
+                <tr>
+                    <th scope="row">This Week</th>
+                    <td className="MAL">{ weekly.calls          }</td>
+                    <td>{ weekly.opportunities                  }</td>
+                    <td>{ weekly.totalEnrollments               }</td>
+                    <td>{ weekly.t2                             }</td>
+                    <td>{ weekly.hpa                            }</td>
+                    <td>{ weekly.mapd                           }</td>
+                    <td>{ weekly.pdp                            }</td>
+                    <td>{ weekly.ae                             }</td>
+                    <td>{ weekly.ms                             }</td>
+                    <td>{ weekly['ms non-gi']                   }</td>
+                    <td>{ weekly.dnsp                           }</td>
+                    <td>{ weekly.abcbs                          }</td>
+                    <td>{ Number(weekly.convRate).toFixed(2)    }</td>
+                </tr>
+            )
         }
 
         function table(){
@@ -241,7 +272,6 @@ class Stats extends Component {
                         <tr>
                             <th></th>
                             <th className="MAL" title="Total Calls">Calls</th>
-                            {/*<th title="Calls with opportunity of conversion">Opportunities</th>*/}
                             <th title="New Enrollments of prospects">New Enrollments</th>
                             <th title="Home Visits">Home Visits</th>
                             <th title="Licensed Agent Callback">LACB</th>
@@ -277,20 +307,11 @@ class Stats extends Component {
                             </div>
                         </div>
                         <div id="gpEntriesWeekly" className="offset-1 col-3 row" title="Entries into Grand Prize raffle - 1 for every 10 MANE enrollments">
-                            {/*TODO: make this based on last 7 days of calls*/}
                             <div className="col-8">
                                 <div>Grand Prize</div>
                                 <div>Week Entries</div>
                             </div>
-                            <div className="col-4 entryCount">{
-                                Math.floor( self.anthemQuery(conversions.aepToDate, 'enrollments', 't2')  / 10) +
-                                Math.floor( self.anthemQuery(conversions.aepToDate, 'enrollments', 'hpa') / 5) +
-                                Math.floor( (
-                                    self.anthemQuery(conversions.aepToDate, 'totalEnrollments') -
-                                    self.anthemQuery(conversions.aepToDate, 'enrollments', 't2') -
-                                    self.anthemQuery(conversions.aepToDate, 'enrollments', 'hpa')
-                                ) / 2)
-                            }
+                            <div className="col-4 entryCount">{ weeklyDrawings() }
                             </div>
                         </div>
                     </div>
@@ -316,6 +337,7 @@ class Stats extends Component {
                         <tbody>
                         { stats('today') }
                         { stats('yesterday') }
+                        { ( sessionStorage.getItem('client') === "Anthem" ) ? weeklyStats() : '' }
                         { stats('aepToDate') }
                         </tbody>
                     </Table>

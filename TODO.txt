@@ -16,7 +16,6 @@ Front End
     - Anthem
         - Don't base enrollment on campaign name if dispo has a different product in its name
         - Do base enrollment on campaign name if dispo doesn't have a different product in its name
-        - Implement the endpoint for gathering stats from a client at a site within a time range
         - Power hour
             - Grab timestamps from each call to assign it double value toward entries
 

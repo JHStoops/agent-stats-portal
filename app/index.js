@@ -32,7 +32,7 @@ process.on('SIGINT', gracefulShutdown); //Ctrl+C (interrupt)
 //Functions
 function gracefulShutdown() {
     console.log('\nStarting Shutdown');
-    db.end(function(err) {
+    db.con.end(function(err) {
         if (err) throw err;
         server.close(function() {
             console.log('\nShutdown Complete');
