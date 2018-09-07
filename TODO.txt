@@ -5,7 +5,10 @@ Front End
 - navbar.js
     - Add input validation to the login form
     - if /login failed, display an error message
+    - let enter button login
 - stats.js
+    - All
+        - Rename the row headers to be capitalized and have spaces
     - Aetna
         - Spreadsheet with all agents’ stats reported near the end of AEP
             - Implement the endpoint for gathering stats from a client at a site within a time range
