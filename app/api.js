@@ -103,9 +103,9 @@ router.route('/stats/:client/:id').get(function(req, res){
     }
 
     //Make queries into promises to resolve them all as one
-    const yesterdayPromise = get(`SELECT ${table.returnFields.map( val => val.field + ' AS ' + val.as).join(', ')} FROM ${table.table} WHERE employee_id="${id}" AND ${table.date} > "${yesterday}" AND ${table.date} < curdate();`, 'yesterday');
-    const aepToDatePromise = get(`SELECT ${table.returnFields.map( val => val.field + ' AS ' + val.as).join(', ')} FROM ${table.table} WHERE employee_id="${id}" AND ${table.date} > "${aepStartDate}";`, 'aepToDate');
-    const TodayPromise = get(`SELECT ${table.returnFields.map( val => val.field + ' AS ' + val.as, '').join(', ')} FROM ${table.table} WHERE employee_id="${id}" AND ${table.date} > curdate();`, 'today');
+    const yesterdayPromise = get(`SELECT ${table.returnFields.map( val => val.field + ' AS ' + val.as).join(', ')} FROM ${table.table} WHERE employee_id="${id}" AND ${table.date} > "${yesterday}" AND ${table.date} < curdate();`, 'Yesterday');
+    const aepToDatePromise = get(`SELECT ${table.returnFields.map( val => val.field + ' AS ' + val.as).join(', ')} FROM ${table.table} WHERE employee_id="${id}" AND ${table.date} > "${aepStartDate}";`, 'AEP To Date');
+    const TodayPromise = get(`SELECT ${table.returnFields.map( val => val.field + ' AS ' + val.as, '').join(', ')} FROM ${table.table} WHERE employee_id="${id}" AND ${table.date} > curdate();`, 'Today');
 
     Promise.all([TodayPromise, yesterdayPromise, aepToDatePromise])
         .then( data => {

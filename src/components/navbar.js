@@ -17,6 +17,7 @@ export default class TopNavbar extends React.Component {
         super(props);
 
         this.toggle = this.toggle.bind(this);
+        this.handleKeyPress = this.handleKeyPress.bind(this);
         this.state = {
             isOpen: false,
             username: 'grliddiard',
@@ -28,6 +29,9 @@ export default class TopNavbar extends React.Component {
     }
     handleChange(e){
         this.setState({ [e.target.name]: e.target.value });
+    }
+    handleKeyPress(e) {
+        if (e.key === 'Enter') this.login();
     }
     login() {
         const self = this;
@@ -96,16 +100,16 @@ export default class TopNavbar extends React.Component {
         const loggedInState = (this.props.getLoggedIn()) ?
                 (
                     <NavItem>
-                        <NavLink href="#" onClick={handleLogout}>Logout</NavLink>    {/*TODO: Make this a logout button and a "Hello, [agentname]" or something*/}
+                        <NavLink href="#" onClick={handleLogout}>Logout</NavLink>
                     </NavItem>
                 )
                 :
                 (
                 <InputGroup>
                     <InputGroupAddon addonType="prepend">
-                        <Input type="text" onChange={ this.handleChange.bind(this) } name="username" id="username" placeholder="Username" value={this.state.username} />
+                        <Input type="text" onChange={ this.handleChange.bind(this) } name="username" id="username" placeholder="Username" value={this.state.username} onKeyPress={self.handleKeyPress} />
                     </InputGroupAddon>
-                    <Input type="password" onChange={ this.handleChange.bind(this) } name="password" id="password" placeholder="password" />
+                    <Input type="password" onChange={ this.handleChange.bind(this) } name="password" id="password" placeholder="password" onKeyPress={self.handleKeyPress} />
                     <InputGroupAddon addonType="append">
                         <Button onClick={this.login.bind( this )}>Login</Button>
                     </InputGroupAddon>
@@ -115,7 +119,7 @@ export default class TopNavbar extends React.Component {
         return (
             <div id="navbar">
                 <Navbar color="light" light expand="md">
-                    <NavbarBrand href="/"><img src={ (['Aetna', 'Caresource'].includes(sessionStorage.getItem('client')) ) ? "/public/ELEVATE4.4.png" : "/public/cXp_Logo.png"} width="108" height="80" alt="AEP 2018 Agent Stats Portal"/></NavbarBrand>
+                    <NavbarBrand href="/"><img src="/public/cXp_Logo.png" alt="AEP 2018 Agent Stats Portal"/></NavbarBrand>
                     <NavbarToggler onClick={this.toggle} />
                     <Collapse isOpen={this.state.isOpen} navbar>
                         <Nav className="ml-auto" navbar>

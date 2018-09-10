@@ -79,7 +79,9 @@ class App extends Component {
         return (
             <div>
                 <TopNavbar getLoggedIn={ this.getLoggedIn } toggleLoggedIn={ this.toggleLoggedIn } setStats={ this.setStats }/>
-                <Stats getLoggedIn={ this.getLoggedIn} getStats={ this.getStats } getWeekly={ this.getWeekly }/>
+                <div>
+                    <Stats getLoggedIn={ this.getLoggedIn} getStats={ this.getStats } getWeekly={ this.getWeekly }/>
+                </div>
             </div>
         );
     }

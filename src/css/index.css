@@ -3,6 +3,25 @@ body {
   padding: 0;
   font-family: sans-serif;
 }
+
+#elevate {
+  position: relative;
+  height: 700px;
+}
+
+#elevate::before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: url('/public/ELEVATE4.4.png');
+  background-repeat: no-repeat;
+  opacity: .1;
+  content: "";
+  z-index: -1;
+}
+
 #navbar input {
   width: 250px;
 }
@@ -21,9 +40,9 @@ td[colspan] {
 #generalStats {
   margin: 20px 0;
 }
-#siteGoalBreakdown, .goalBreakdown, #gpEntries, #gpEntriesWeekly {
+#agentGoalBreakdown, .goalBreakdown, #gpEntries, #gpEntriesWeekly {
   font-size: 20px;
 }
-#siteGoalPercent, .entryCount {
+#agentGoalPercent, .entryCount {
   font-size: 40px;
 }

@@ -8,15 +8,15 @@ Front End
     - let enter button login
 - stats.js
     - All
-        - Rename the row headers to be capitalized and have spaces
+        - Add site-wide goal to agent view -- it shows their contributions.
     - Aetna
+        - (Modal popup) Take Ben's explanatory text about the bonus based on the agent's % to goal.
+            - show their current % to goal in the help modal
         - Spreadsheet with all agents’ stats reported near the end of AEP
-            - Implement the endpoint for gathering stats from a client at a site within a time range
-            - Function that randomly draws winner of grand prize based on number of entries. (one grand prize per site/LoB)
     - CareSource
         - Spreadsheet with all agents’ stats reported near the end of AEP
-            - Implement the endpoint for gathering stats from a client at a site within a time range
     - Anthem
+        - on "This Week" stats, default to zero when there's no data.
         - Don't base enrollment on campaign name if dispo has a different product in its name
         - Do base enrollment on campaign name if dispo doesn't have a different product in its name
         - Power hour

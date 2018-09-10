@@ -6,7 +6,7 @@ class Stats extends Component {
         super(props);
         this.state = {
             loggedId: this.props.getLoggedIn,
-            siteGoal: {
+            agentGoal: {
                 'Aetna': {
                     'MANE': {
                         'Provo': 33,
@@ -198,32 +198,32 @@ class Stats extends Component {
             if (!self.props.getLoggedIn()) return (<p>Please log in</p>);
 
             if (sessionStorage.getItem('client') === 'Aetna') return (
-                <div>
+                <div id="elevate">
                     <div id="generalStats" className="container row">
                         <div id="maneGoal" className="col-3 row" title="Your progress to reaching your site's MANE goal for individual agents during AEP">
                             <div className="col-8 row goalBreakdown">
                                 <span className="col-8">MANE:</span>
-                                <span className="col-4">{ self.aetnaCaresourceQuery(conversions.aepToDate, 'enrollments', 'MA', 'P') }</span>
+                                <span className="col-4">{ self.aetnaCaresourceQuery(conversions['AEP To Date'], 'enrollments', 'MA', 'P') }</span>
                                 <br />
                                 <span className="col-8">Goal:</span>
-                                <span className="col-4">{ self.state.siteGoal[sessionStorage.getItem('client')]['MANE'][sessionStorage.getItem('site')] }</span>
+                                <span className="col-4">{ self.state.agentGoal[sessionStorage.getItem('client')]['MANE'][sessionStorage.getItem('site')] }</span>
                             </div>
-                            <span id="siteGoalPercent" className="col-4">
-                                { Number(self.aetnaCaresourceQuery(conversions.aepToDate, 'enrollments', 'MA', 'P') /
-                                    self.state.siteGoal[sessionStorage.getItem('client')]['MANE'][sessionStorage.getItem('site')] * 100).toFixed(2)}%
+                            <span id="agentGoalPercent" className="col-4">
+                                { Number(self.aetnaCaresourceQuery(conversions['AEP To Date'], 'enrollments', 'MA', 'P') /
+                                    self.state.agentGoal[sessionStorage.getItem('client')]['MANE'][sessionStorage.getItem('site')] * 100).toFixed(2)}%
                             </span>
                         </div>
                         <div id="pdpneGoal" className="offset-1 col-3 row" title="Your progress to reaching your site's PDPNE goal for individual agents during AEP">
                             <div className="col-8 row goalBreakdown">
                                 <span className="col-8">PDPNE:</span>
-                                <span className="col-4">{ self.aetnaCaresourceQuery(conversions.aepToDate, 'enrollments', 'PDP', 'P') }</span>
+                                <span className="col-4">{ self.aetnaCaresourceQuery(conversions['AEP To Date'], 'enrollments', 'PDP', 'P') }</span>
                                 <br />
                                 <span className="col-8">Goal:</span>
-                                <span className="col-4">{ self.state.siteGoal[sessionStorage.getItem('client')]['PDPNE'][sessionStorage.getItem('site')] }</span>
+                                <span className="col-4">{ self.state.agentGoal[sessionStorage.getItem('client')]['PDPNE'][sessionStorage.getItem('site')] }</span>
                             </div>
-                            <span id="siteGoalPercent" className="col-4">
-                                { Number(self.aetnaCaresourceQuery(conversions.aepToDate, 'enrollments', 'PDP', 'P') /
-                                    self.state.siteGoal[sessionStorage.getItem('client')]['PDPNE'][sessionStorage.getItem('site')] * 100).toFixed(2)}%
+                            <span id="agentGoalPercent" className="col-4">
+                                { Number(self.aetnaCaresourceQuery(conversions['AEP To Date'], 'enrollments', 'PDP', 'P') /
+                                    self.state.agentGoal[sessionStorage.getItem('client')]['PDPNE'][sessionStorage.getItem('site')] * 100).toFixed(2)}%
                             </span>
                         </div>
                         <div id="gpEntries" className="offset-1 col-3 row" title="Entries into Grand Prize raffle &#13; 1 for every 5 MANE or PDPNE enrollments">
@@ -233,8 +233,8 @@ class Stats extends Component {
                             </div>
                             <div className="col-4 entryCount">{
                                 Math.floor( (
-                                    self.aetnaCaresourceQuery(conversions.aepToDate, 'enrollments', 'MA', 'P')
-                                    + self.aetnaCaresourceQuery(conversions.aepToDate, 'enrollments', 'PDP', 'P') )
+                                    self.aetnaCaresourceQuery(conversions['AEP To Date'], 'enrollments', 'MA', 'P')
+                                    + self.aetnaCaresourceQuery(conversions['AEP To Date'], 'enrollments', 'PDP', 'P') )
                                     / 5) // Every 5 new enrollments gives an entry to the gp drawing)
                             }
                             </div>
@@ -263,28 +263,28 @@ class Stats extends Component {
                         </tr>
                         </thead>
                         <tbody>
-                        { stats('today') }
-                        { stats('yesterday') }
-                        { stats('aepToDate') }
+                        { stats('Today') }
+                        { stats('Yesterday') }
+                        { stats('AEP To Date') }
                         </tbody>
                     </Table>
                 </div>
             );
 
             else if (sessionStorage.getItem('client') === 'Caresource') return (
-                <div>
+                <div id="elevate">
                     <div id="generalStats" className="container row">
-                        <div id="siteGoal" className="col-3 row" title="Your progress to reaching your site's goal for each agent during AEP">
-                            <div id="siteGoalBreakdown" className="col-8 row">
+                        <div id="agentGoal" className="col-3 row" title="Your progress to reaching your site's goal for each agent during AEP">
+                            <div id="agentGoalBreakdown" className="col-8 row">
                                 <span className="col-6">MANE:</span>
-                                <span className="col-6">{ self.aetnaCaresourceQuery(conversions.aepToDate, 'enrollments', 'MA', 'P') }</span>
+                                <span className="col-6">{ self.aetnaCaresourceQuery(conversions['AEP To Date'], 'enrollments', 'MA', 'P') }</span>
                                 <br />
                                 <span className="col-6">Goal:</span>
-                                <span className="col-6">{ self.state.siteGoal[sessionStorage.getItem('client')]['MANE'][sessionStorage.getItem('site')] }</span>
+                                <span className="col-6">{ self.state.agentGoal[sessionStorage.getItem('client')]['MANE'][sessionStorage.getItem('site')] }</span>
                             </div>
-                            <span id="siteGoalPercent" className="col-4">
-                                { Number(self.aetnaCaresourceQuery(conversions.aepToDate, 'enrollments', 'MA', 'P') /
-                                    self.state.siteGoal[sessionStorage.getItem('client')]['MANE'][sessionStorage.getItem('site')] * 100).toFixed(2)}%
+                            <span id="agentGoalPercent" className="col-4">
+                                { Number(self.aetnaCaresourceQuery(conversions['AEP To Date'], 'enrollments', 'MA', 'P') /
+                                    self.state.agentGoal[sessionStorage.getItem('client')]['MANE'][sessionStorage.getItem('site')] * 100).toFixed(2)}%
                             </span>
                         </div>
                     </div>
@@ -300,9 +300,9 @@ class Stats extends Component {
                         </tr>
                         </thead>
                         <tbody>
-                        { stats('today') }
-                        { stats('yesterday') }
-                        { stats('aepToDate') }
+                        { stats('Today') }
+                        { stats('Yesterday') }
+                        { stats('AEP To Date') }
                         </tbody>
                     </Table>
                 </div>
@@ -317,12 +317,12 @@ class Stats extends Component {
                                 <div>AEP Entries</div>
                             </div>
                             <div className="col-4 entryCount">{
-                                Math.floor( self.anthemQuery(conversions.aepToDate, 'enrollments', 't2')  / 10) +
-                                Math.floor( self.anthemQuery(conversions.aepToDate, 'enrollments', 'hpa') / 5) +
+                                Math.floor( self.anthemQuery(conversions['AEP To Date'], 'enrollments', 't2')  / 10) +
+                                Math.floor( self.anthemQuery(conversions['AEP To Date'], 'enrollments', 'hpa') / 5) +
                                 Math.floor( (
-                                    self.anthemQuery(conversions.aepToDate, 'totalEnrollments') -
-                                    self.anthemQuery(conversions.aepToDate, 'enrollments', 't2') -
-                                    self.anthemQuery(conversions.aepToDate, 'enrollments', 'hpa')
+                                    self.anthemQuery(conversions['AEP To Date'], 'totalEnrollments') -
+                                    self.anthemQuery(conversions['AEP To Date'], 'enrollments', 't2') -
+                                    self.anthemQuery(conversions['AEP To Date'], 'enrollments', 'hpa')
                                 ) / 2)
                             }
                             </div>
@@ -356,10 +356,10 @@ class Stats extends Component {
                         </tr>
                         </thead>
                         <tbody>
-                        { stats('today') }
-                        { stats('yesterday') }
+                        { stats('Today') }
+                        { stats('Yesterday') }
                         { ( sessionStorage.getItem('client') === "Anthem" ) ? weeklyStats() : '' }
-                        { stats('aepToDate') }
+                        { stats('AEP To Date') }
                         </tbody>
                     </Table>
                 </div>
@@ -367,7 +367,7 @@ class Stats extends Component {
         }
 
         return (
-            <div id="stats">
+            <div>
                 { table() }
             </div>
         );
