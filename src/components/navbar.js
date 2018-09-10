@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+    Alert,
     Collapse,
     Navbar,
     NavbarToggler,
@@ -21,7 +22,8 @@ export default class TopNavbar extends React.Component {
         this.state = {
             isOpen: false,
             username: 'grliddiard',
-            password: ''
+            password: '',
+            errorMsg: ''
         };
     }
     toggle() {
@@ -33,21 +35,51 @@ export default class TopNavbar extends React.Component {
     handleKeyPress(e) {
         if (e.key === 'Enter') this.login();
     }
+    triggerErrorMessage(msg){
+        const self = this;
+        self.setState({ errorMsg: msg });
+        const el = document.getElementById('errorMsg');
+
+        const fade = (() => {
+            if (el.style.opacity > 0) {
+                el.style.opacity = (el.style.opacity - 0.1).toFixed(2);     // decrease opacity slightly
+                setTimeout( fade, 90 );                                     // call fade again in a fraction of a second
+            } else {
+                el.style.display = "none";
+                self.setState({ errorMsg: '' });
+            }
+        });
+
+        const unfade = (() => {
+            el.style.opacity = 1;
+            el.style.display = "block";
+        });
+
+        unfade();
+
+        setTimeout(() => {
+            fade();
+        }, 3000);
+    }
     login() {
         const self = this;
         //TODO: add input validation
 
         // TODO: commented to skip the ldap login, since my account doesn't have agent data...
-        // fetch('http://localhost:3000/api/login', {
-        //     method: 'POST',
-        //     body: JSON.stringify({username: this.state.username, password: this.state.password}),
-        //     headers: {
-        //         'accept': 'application/json',
-        //         'content-type': 'application/json'
-        //     }
-        // })
-        //     .then( function(res){
-                fetch('http://localhost:3000/api/me', {
+        fetch('/api/login', {
+            method: 'POST',
+            body: JSON.stringify({username: this.state.username, password: this.state.password}),
+            headers: {
+                'accept': 'application/json',
+                'content-type': 'application/json'
+            }
+        })
+            .then( function(res){
+                if ( res.status !== 201) {
+                    self.triggerErrorMessage('Incorrect credentials');
+                    throw new Error('Failed to log in');
+                }
+                fetch('/api/me', {
                     method: 'POST',
                     body: JSON.stringify({username: self.state.username}),
                     headers: {
@@ -68,7 +100,7 @@ export default class TopNavbar extends React.Component {
                         sessionStorage.setItem('hash', user.hash);
 
                         //fetch agent stats
-                        fetch(`http://localhost:3000/api/stats/${user.client}/${user.userid}`, {
+                        fetch(`/api/stats/${user.client}/${user.userid}`, {
                             method: 'GET',
                             headers: {
                                 'accept': 'application/json',
@@ -84,7 +116,8 @@ export default class TopNavbar extends React.Component {
                             })
                             .catch( err => {console.log(err); self.props.toggleLoggedIn(false);})
                     })
-        //     })
+            })
+            .catch( err => console.log(err) )
     }
     logout() {
         sessionStorage.clear();
@@ -116,6 +149,12 @@ export default class TopNavbar extends React.Component {
                 </InputGroup>
             );
 
+        const activeError = (
+                    <Alert id="errorMsg" color="danger">
+                        { self.state.errorMsg }
+                    </Alert>
+            );
+
         return (
             <div id="navbar">
                 <Navbar color="light" light expand="md">
@@ -123,6 +162,7 @@ export default class TopNavbar extends React.Component {
                     <NavbarToggler onClick={this.toggle} />
                     <Collapse isOpen={this.state.isOpen} navbar>
                         <Nav className="ml-auto" navbar>
+                            { activeError }
                             { loggedInState }
                         </Nav>
                     </Collapse>

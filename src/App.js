@@ -39,7 +39,7 @@ class App extends Component {
         if (sessionStorage.getItem('hash') !== null) {
             this.setState({ loggedIn: true});
             const self = this;
-            fetch(`http://localhost:3000/api/stats/${sessionStorage.getItem('client')}/${sessionStorage.getItem('userid')}`, {
+            fetch(`/api/stats/${sessionStorage.getItem('client')}/${sessionStorage.getItem('userid')}`, {
                 method: 'GET',
                 headers: {
                     'accept': 'application/json',
@@ -57,7 +57,7 @@ class App extends Component {
             //If it's an anthem agent, download stats for weekly drawing
             if (sessionStorage.getItem('client').toLowerCase() === 'anthem'){
                 const weeklyDrawingStart = "2018-09-03";
-                fetch(`http://localhost:3000/api/report/${sessionStorage.getItem('client')}/${sessionStorage.getItem('site')}/${weeklyDrawingStart}`, {
+                fetch(`/api/report/${sessionStorage.getItem('client')}/${sessionStorage.getItem('site')}/${weeklyDrawingStart}`, {
                     method: 'GET',
                     headers: {
                         'accept': 'application/json',

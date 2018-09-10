@@ -1,11 +1,9 @@
 /*********************/
 Front End
 - ALL
-    - Only log out agent on 403 error
+    -
 - navbar.js
     - Add input validation to the login form
-    - if /login failed, display an error message
-    - let enter button login
 - stats.js
     - All
         - Add site-wide goal to agent view -- it shows their contributions.

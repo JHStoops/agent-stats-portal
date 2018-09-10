@@ -177,19 +177,19 @@ class Stats extends Component {
             return (
                 <tr>
                     <th scope="row">This Week</th>
-                    <td className="MAL">{ weekly.calls          }</td>
-                    <td>{ weekly.opportunities                  }</td>
-                    <td>{ weekly.totalEnrollments               }</td>
-                    <td>{ weekly.t2                             }</td>
-                    <td>{ weekly.hpa                            }</td>
-                    <td>{ weekly.mapd                           }</td>
-                    <td>{ weekly.pdp                            }</td>
-                    <td>{ weekly.ae                             }</td>
-                    <td>{ weekly.ms                             }</td>
-                    <td>{ weekly['ms non-gi']                   }</td>
-                    <td>{ weekly.dnsp                           }</td>
-                    <td>{ weekly.abcbs                          }</td>
-                    <td>{ Number(weekly.convRate).toFixed(2)    }</td>
+                    <td className="MAL">{ weekly.calls | 0          }</td>
+                    <td>{ weekly.opportunities | 0                  }</td>
+                    <td>{ weekly.totalEnrollments | 0               }</td>
+                    <td>{ weekly.t2 | 0                             }</td>
+                    <td>{ weekly.hpa | 0                            }</td>
+                    <td>{ weekly.mapd | 0                           }</td>
+                    <td>{ weekly.pdp | 0                            }</td>
+                    <td>{ weekly.ae | 0                             }</td>
+                    <td>{ weekly.ms | 0                             }</td>
+                    <td>{ weekly['ms non-gi'] | 0                   }</td>
+                    <td>{ weekly.dnsp | 0                           }</td>
+                    <td>{ weekly.abcbs | 0                          }</td>
+                    <td>{ Number(weekly.convRate).toFixed(2) | 0    }</td>
                 </tr>
             )
         }

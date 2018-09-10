@@ -46,3 +46,10 @@ td[colspan] {
 #agentGoalPercent, .entryCount {
   font-size: 40px;
 }
+#errorMsg {
+    display: none;
+    min-width: 200px;
+    height: 38px;
+    padding: 6px 0 0 10px;
+    margin: 0 10px 0 0;
+}
