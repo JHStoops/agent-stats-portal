@@ -104,21 +104,17 @@ class Stats extends Component {
     }
 
     render() {
-        let conversions = this.props.getStats();
-        let weekly = this.props.getWeekly();
-        let weeklyDrawings = function() {
-            const product = Math.floor( (Number(weekly.t2)  / 10) +
-            Math.floor( Number(weekly.hpa) / 5) +
-            Math.floor(
-                Number(weekly.totalEnrollments) -
-                Number(weekly.t2) -
-                Number(weekly.hpa)
-            ) / 2);
-
-            return (isNaN(product)) ? 0 : product;
-
-        };
         const self = this;
+        let conversions = this.props.getStats();
+        let weekly = (sessionStorage.getItem('client') === 'Anthem') ? this.props.getWeekly() : null;
+        const weeklyDrawings = function () {
+                const product = Math.floor((Number(weekly.t2) / 10) +
+                    Math.floor(Number(weekly.hpa) / 5) +
+                    Math.floor(
+                        Number( weekly.totalEnrollments) - Number(weekly.t2) - Number(weekly.hpa)
+                    ) / 2);
+                return (isNaN(product)) ? 0 : product;
+            };
 
         function stats(attr) {
             if (sessionStorage.getItem('client') === 'Aetna') return (
@@ -358,7 +354,7 @@ class Stats extends Component {
                         <tbody>
                         { stats('Today') }
                         { stats('Yesterday') }
-                        { ( sessionStorage.getItem('client') === "Anthem" ) ? weeklyStats() : '' }
+                        { weeklyStats() }
                         { stats('AEP To Date') }
                         </tbody>
                     </Table>

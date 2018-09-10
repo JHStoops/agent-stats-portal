@@ -14,14 +14,10 @@ Front End
     - CareSource
         - Spreadsheet with all agents’ stats reported near the end of AEP
     - Anthem
-        - on "This Week" stats, default to zero when there's no data.
         - Don't base enrollment on campaign name if dispo has a different product in its name
         - Do base enrollment on campaign name if dispo doesn't have a different product in its name
         - Power hour
             - Grab timestamps from each call to assign it double value toward entries
-
-
-
 
 
 /*********************/

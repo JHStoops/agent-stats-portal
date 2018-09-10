@@ -66,19 +66,19 @@ export default class TopNavbar extends React.Component {
         //TODO: add input validation
 
         // TODO: commented to skip the ldap login, since my account doesn't have agent data...
-        fetch('/api/login', {
-            method: 'POST',
-            body: JSON.stringify({username: this.state.username, password: this.state.password}),
-            headers: {
-                'accept': 'application/json',
-                'content-type': 'application/json'
-            }
-        })
-            .then( function(res){
-                if ( res.status !== 201) {
-                    self.triggerErrorMessage('Incorrect credentials');
-                    throw new Error('Failed to log in');
-                }
+        // fetch('/api/login', {
+        //     method: 'POST',
+        //     body: JSON.stringify({username: this.state.username, password: this.state.password}),
+        //     headers: {
+        //         'accept': 'application/json',
+        //         'content-type': 'application/json'
+        //     }
+        // })
+        //     .then( function(res){
+        //         if ( res.status !== 201) {
+        //             self.triggerErrorMessage('Incorrect credentials');
+        //             throw new Error('Failed to log in');
+        //         }
                 fetch('/api/me', {
                     method: 'POST',
                     body: JSON.stringify({username: self.state.username}),
@@ -100,24 +100,11 @@ export default class TopNavbar extends React.Component {
                         sessionStorage.setItem('hash', user.hash);
 
                         //fetch agent stats
-                        fetch(`/api/stats/${user.client}/${user.userid}`, {
-                            method: 'GET',
-                            headers: {
-                                'accept': 'application/json',
-                                'content-type': 'application/json',
-                                'x-authentication': user.hash
-                            }
-                        })
-                            .then( data => data.json() )
-                            .then( function(stats){
-                                console.log(stats);
-                                self.props.setStats(stats);
-                                self.props.toggleLoggedIn(true);
-                            })
-                            .catch( err => {console.log(err); self.props.toggleLoggedIn(false);})
+                        self.props.getStats();
+                        self.props.toggleLoggedIn(true);
                     })
-            })
-            .catch( err => console.log(err) )
+            // })
+            // .catch( err => console.log(err) )
     }
     logout() {
         sessionStorage.clear();
