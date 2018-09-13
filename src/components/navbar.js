@@ -89,7 +89,6 @@ export default class TopNavbar extends React.Component {
                 })
                     .then( data => data.json() )
                     .then( function(user) {
-                        // TODO: should this be stored in react component instead, and loaded on refresh?
                         //store user info
                         sessionStorage.setItem('client', user.client);
                         sessionStorage.setItem('userid', user.userid);
@@ -107,7 +106,6 @@ export default class TopNavbar extends React.Component {
             // .catch( err => console.log(err) )
     }
     logout() {
-        sessionStorage.clear();
         this.props.toggleLoggedIn(false);
     }
     render() {

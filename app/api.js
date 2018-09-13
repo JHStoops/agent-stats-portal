@@ -118,6 +118,29 @@ router.route('/stats/:client/:id').get(function(req, res){
         .catch( err => console.log(err) );
 });
 
+router.route('/siteEnrollments/:client/:site').get(function(req, res){
+    //Grab all stats for a client by site
+    const client = req.params.client.toLowerCase();
+    const site = req.params.site.toLowerCase().replace('%20', ' ');
+    const startDate ='2018-08-01';
+    const table = TABLES[client];
+
+    const query = `
+        SELECT 
+            sum( if(conv.product = "MA" AND conv.type = "P" AND conv.enrollment = 1, 1, 0) ) AS mane
+            ${ (client === 'aetna') ? ', sum( if(product = "PDP" AND type = "P" AND enrollment = 1, 1, 0) ) AS pdpne' : ''}
+        FROM iex_data.nice_agentroster_table AS nice, ${ table.table } AS conv
+        WHERE nice.callpro_userid = conv.employee_id
+            AND conv.${table.date} > "${ startDate }"
+            AND nice.mu LIKE "%${site}%";
+    `;
+
+    db.con.query(query, function(err, rows){
+        if (err) console.log(err);
+        res.status(201).send(rows);
+    });
+});
+
 router.route('/report/:client/:site/:startDate/:endDate?').get(function(req, res){
     //Grab all stats for a client by site
     const client = req.params.client.toLowerCase();
@@ -132,15 +155,15 @@ router.route('/report/:client/:site/:startDate/:endDate?').get(function(req, res
             # Aetna and CareSource
             ${ (client !== 'anthem') ? 'sum( if(conv.product = "MA", 1, 0) ) AS maCalls,' : '' }
             ${ (client !== 'anthem') ? 'sum( if(conv.product = "MA" AND conv.type = "P" AND enrollment = 1, 1, 0) ) AS mane,' : '' }
-            ${ (client === 'aetna') ? 'sum( if(conv.product = "MA" AND conv.type = "M" AND enrollment = 1, 1, 0) ) AS mapc,' : '' }
+            ${ (client === 'aetna')  ? 'sum( if(conv.product = "MA" AND conv.type = "M" AND enrollment = 1, 1, 0) ) AS mapc,' : '' }
             ${ (client !== 'anthem') ? 'sum( if(conv.home_appt = 1, 1, 0) ) AS hv,' : '' }
             ${ (client !== 'anthem') ? 'sum( if(conv.lacb = 1, 1, 0) ) AS lacb,' : '' }
-            ${ (client === 'aetna') ? 'ifnull( sum( if( conv.product = "MA" AND conv.type = "P" AND (conv.enrollment = 1 OR conv.home_appt = 1 OR conv.lacb = 1 ), 1, 0) ) / sum( if(conv.product = "MA" AND conv.type = "P", 1, 0) ) * 100, 0 ) AS rawConvRate,' : '' }
+            ${ (client === 'aetna')  ? 'ifnull( sum( if( conv.product = "MA" AND conv.type = "P" AND (conv.enrollment = 1 OR conv.home_appt = 1 OR conv.lacb = 1 ), 1, 0) ) / sum( if(conv.product = "MA" AND conv.type = "P", 1, 0) ) * 100, 0 ) AS rawConvRate,' : '' }
             ${ (client !== 'anthem') ? 'ifnull( sum( if(conv.product = "MA" AND conv.type = "P" AND enrollment = 1, 1, 0) ) / sum( if(conv.product = "MA" AND conv.type = "P", 1, 0) ) * 100, 0 ) AS maConvRate,' : ''}
-            ${ (client === 'aetna') ? 'sum( if(conv.product = "PDP", 1, 0) ) AS pdpcalls,' : '' }
-            ${ (client === 'aetna') ? 'sum( if(conv.product = "PDP" AND conv.type = "P" AND enrollment = 1, 1, 0) ) AS pdpne,' : '' }
-            ${ (client === 'aetna') ? 'sum( if(conv.product = "PDP" AND conv.type = "M" AND enrollment = 1, 1, 0) ) AS pdppc,' : '' }
-            ${ (client === 'aetna') ? 'ifnull( sum( if(conv.product = "PDP" AND conv.type = "P" AND enrollment = 1, 1, 0) ) / sum( if(conv.product = "PDP" AND conv.type = "P", 1, 0) ) * 100, 0 ) AS pdpConvRate' : '' }
+            ${ (client === 'aetna')  ? 'sum( if(conv.product = "PDP", 1, 0) ) AS pdpcalls,' : '' }
+            ${ (client === 'aetna')  ? 'sum( if(conv.product = "PDP" AND conv.type = "P" AND enrollment = 1, 1, 0) ) AS pdpne,' : '' }
+            ${ (client === 'aetna')  ? 'sum( if(conv.product = "PDP" AND conv.type = "M" AND enrollment = 1, 1, 0) ) AS pdppc,' : '' }
+            ${ (client === 'aetna')  ? 'ifnull( sum( if(conv.product = "PDP" AND conv.type = "P" AND enrollment = 1, 1, 0) ) / sum( if(conv.product = "PDP" AND conv.type = "P", 1, 0) ) * 100, 0 ) AS pdpConvRate' : '' }
             
             # Anthem Stats
             ${ (client === 'anthem') ? db.anthemStatsQuery : ''}
@@ -157,6 +180,6 @@ router.route('/report/:client/:site/:startDate/:endDate?').get(function(req, res
 
     db.con.query(query, function(err, rows){
         if (err) console.log(err);
-        res.status(218).send(rows);
+        res.status(201).send(rows);
     });
 });

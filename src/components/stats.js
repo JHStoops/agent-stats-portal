@@ -6,6 +6,29 @@ class Stats extends Component {
         super(props);
         this.state = {
             loggedId: this.props.getLoggedIn,
+            siteGoals: {
+                'Aetna': {
+                    'MANE': {
+                        'Provo': 3000,
+                        'Salt Lake City': 56,
+                        'Sawgrass': 1222,
+                        'San Antonio': 1222,
+                        'Memphis': 56
+                    },
+                    'PDPNE': {
+                        'Provo': 8960,
+                        'Salt Lake City': 9600,
+                        'Sawgrass': 320,
+                        'San Antonio': 320,
+                        'Memphis': 12800
+                    }
+                },
+                'Caresource': {
+                    'MANE': {
+                        'Salt Lake City': 1200
+                    }
+                }
+            },
             agentGoal: {
                 'Aetna': {
                     'MANE': {
@@ -190,120 +213,129 @@ class Stats extends Component {
             )
         }
 
+        function goalsElement(id, title, class_name, product, goalEntity, progress){
+            return (
+                <div id={id} className={ class_name } title={title}>
+                    <div className="col-8 row goalBreakdown">
+                        <span className="col-8">{ product }:</span>
+                        <span className="col-4">{ progress }</span>
+                        <br />
+                        <span className="col-8">Goal:</span>
+                        <span className="col-4">{ self.state[goalEntity][sessionStorage.getItem('client')][product][sessionStorage.getItem('site')] }</span>
+                    </div>
+                    <span id="agentGoalPercent" className="col-4">
+                        { Number(progress /
+                            self.state[goalEntity][sessionStorage.getItem('client')][product][sessionStorage.getItem('site')] * 100).toFixed(2) }%
+                    </span>
+                </div>
+            );
+        }
+
         function table(){
             if (!self.props.getLoggedIn()) return (<p>Please log in</p>);
 
-            if (sessionStorage.getItem('client') === 'Aetna') return (
-                <div id="elevate">
-                    <div id="generalStats" className="container row">
-                        <div id="maneGoal" className="col-3 row" title="Your progress to reaching your site's MANE goal for individual agents during AEP">
-                            <div className="col-8 row goalBreakdown">
-                                <span className="col-8">MANE:</span>
-                                <span className="col-4">{ self.aetnaCaresourceQuery(conversions['AEP To Date'], 'enrollments', 'MA', 'P') }</span>
-                                <br />
-                                <span className="col-8">Goal:</span>
-                                <span className="col-4">{ self.state.agentGoal[sessionStorage.getItem('client')]['MANE'][sessionStorage.getItem('site')] }</span>
-                            </div>
-                            <span id="agentGoalPercent" className="col-4">
-                                { Number(self.aetnaCaresourceQuery(conversions['AEP To Date'], 'enrollments', 'MA', 'P') /
-                                    self.state.agentGoal[sessionStorage.getItem('client')]['MANE'][sessionStorage.getItem('site')] * 100).toFixed(2)}%
-                            </span>
-                        </div>
-                        <div id="pdpneGoal" className="offset-1 col-3 row" title="Your progress to reaching your site's PDPNE goal for individual agents during AEP">
-                            <div className="col-8 row goalBreakdown">
-                                <span className="col-8">PDPNE:</span>
-                                <span className="col-4">{ self.aetnaCaresourceQuery(conversions['AEP To Date'], 'enrollments', 'PDP', 'P') }</span>
-                                <br />
-                                <span className="col-8">Goal:</span>
-                                <span className="col-4">{ self.state.agentGoal[sessionStorage.getItem('client')]['PDPNE'][sessionStorage.getItem('site')] }</span>
-                            </div>
-                            <span id="agentGoalPercent" className="col-4">
-                                { Number(self.aetnaCaresourceQuery(conversions['AEP To Date'], 'enrollments', 'PDP', 'P') /
-                                    self.state.agentGoal[sessionStorage.getItem('client')]['PDPNE'][sessionStorage.getItem('site')] * 100).toFixed(2)}%
-                            </span>
-                        </div>
-                        <div id="gpEntries" className="offset-1 col-3 row" title="Entries into Grand Prize raffle &#13; 1 for every 5 MANE or PDPNE enrollments">
-                            <div className="col-8">
-                                <div>Grand Prize</div>
-                                <div>AEP Entries</div>
-                            </div>
-                            <div className="col-4 entryCount">{
-                                Math.floor( (
-                                    self.aetnaCaresourceQuery(conversions['AEP To Date'], 'enrollments', 'MA', 'P')
-                                    + self.aetnaCaresourceQuery(conversions['AEP To Date'], 'enrollments', 'PDP', 'P') )
-                                    / 5) // Every 5 new enrollments gives an entry to the gp drawing)
-                            }
-                            </div>
-                        </div>
-                    </div>
-                    <Table>
-                        <thead>
-                        <tr>
-                            <td></td>
-                            <td colSpan="7">MA</td>
-                            <td colSpan="5">PDP</td>
-                        </tr>
-                        <tr>
-                            <th></th>
-                            <th className="MAL" title="Total MA Calls">Calls</th>
-                            <th title="New Enrollments of prospects">NE</th>
-                            <th title="Plan Change for current members">PC</th>
-                            <th title="Home Visits">HV</th>
-                            <th title="Licensed Agent Callback">LACB</th>
-                            <th title="Raw Conversion Rate - all prospect enrollments and leads divided by total prospect calls">Raw Conv %</th>
-                            <th className="MAR" title="Conversion Rate - only new enrollments over prospect calls">Conv %</th>
-                            <th title="Total PDP Calls">Calls</th>
-                            <th title="New Enrollments of prospects">NE</th>
-                            <th title="Plan Change for current members">PC</th>
-                            <th title="Conversion Rate - only prospect enrollments over prospect calls">Conv %</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        { stats('Today') }
-                        { stats('Yesterday') }
-                        { stats('AEP To Date') }
-                        </tbody>
-                    </Table>
-                </div>
-            );
+            if (sessionStorage.getItem('client') === 'Aetna'){
+                const totalSiteEnrollments = self.props.getTotalSiteEnrollments();
+                return (
+                    <div id="elevate">
+                        <div id="siteGoals" className="container row">
+                            <div className="col-3 goal-label">Site Goals:</div>
+                            { goalsElement("maneSiteGoal", "Your site's progress to reaching MANE goal during AEP",
+                                "col-4 row", "MANE", "siteGoals", totalSiteEnrollments.mane) }
 
-            else if (sessionStorage.getItem('client') === 'Caresource') return (
-                <div id="elevate">
-                    <div id="generalStats" className="container row">
-                        <div id="agentGoal" className="col-3 row" title="Your progress to reaching your site's goal for each agent during AEP">
-                            <div id="agentGoalBreakdown" className="col-8 row">
-                                <span className="col-6">MANE:</span>
-                                <span className="col-6">{ self.aetnaCaresourceQuery(conversions['AEP To Date'], 'enrollments', 'MA', 'P') }</span>
-                                <br />
-                                <span className="col-6">Goal:</span>
-                                <span className="col-6">{ self.state.agentGoal[sessionStorage.getItem('client')]['MANE'][sessionStorage.getItem('site')] }</span>
-                            </div>
-                            <span id="agentGoalPercent" className="col-4">
-                                { Number(self.aetnaCaresourceQuery(conversions['AEP To Date'], 'enrollments', 'MA', 'P') /
-                                    self.state.agentGoal[sessionStorage.getItem('client')]['MANE'][sessionStorage.getItem('site')] * 100).toFixed(2)}%
-                            </span>
+                            { goalsElement("pdpneSiteGoal", "Your site's progress to reaching PDPNE goal during AEP",
+                                "offset-1 col-4 row", "PDPNE", "siteGoals", totalSiteEnrollments.pdpne) }
                         </div>
-                    </div>
-                    <Table>
-                        <thead>
-                        <tr>
-                            <th></th>
-                            <th className="MAL" title="Total Calls">Calls</th>
-                            <th title="New Enrollments of prospects">New Enrollments</th>
-                            <th title="Home Visits">Home Visits</th>
-                            <th title="Licensed Agent Callback">LACB</th>
-                            <th className="MAR" title="Conversion Rate - only new enrollments over prospect calls">Conversion Rate</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        { stats('Today') }
-                        { stats('Yesterday') }
-                        { stats('AEP To Date') }
-                        </tbody>
-                    </Table>
-                </div>
-            );
+                        <div id="generalStats" className="container row">
+                            <div className="col-3 goal-label">Agent Goals:</div>
+                            { goalsElement("maneGoal", "Your progress to reaching your site's MANE goal for individual agents during AEP",
+                                "col-4 row", "MANE", "agentGoal", self.aetnaCaresourceQuery(conversions['AEP To Date'], 'enrollments', 'MA', 'P')) }
 
+                            { goalsElement("pdpneGoal", "Your progress to reaching your site's PDPNE goal for individual agents during AEP",
+                                "offset-1 col-4 row", "PDPNE", "agentGoal", self.aetnaCaresourceQuery(conversions['AEP To Date'], 'enrollments', 'PDP', 'P')) }
+                        </div>
+
+                        <div id="gpEntries" className="container row">
+                            <div className="offset-3 col-5 row" title="Entries into Grand Prize raffle &#13; 1 for every 5 MANE or PDPNE enrollments">
+                                <div className="col-4">
+                                    <div>Grand Prize</div>
+                                    <div>AEP Entries</div>
+                                </div>
+                                <div className="col-4 entryCount">{
+                                    Math.floor( (
+                                        self.aetnaCaresourceQuery(conversions['AEP To Date'], 'enrollments', 'MA', 'P')
+                                        + self.aetnaCaresourceQuery(conversions['AEP To Date'], 'enrollments', 'PDP', 'P') )
+                                        / 5) // Every 5 new enrollments gives an entry to the gp drawing)
+                                }
+                                </div>
+                            </div>
+                        </div>
+                        <Table>
+                            <thead>
+                            <tr>
+                                <td></td>
+                                <td colSpan="7">MA</td>
+                                <td colSpan="5">PDP</td>
+                            </tr>
+                            <tr>
+                                <th></th>
+                                <th className="MAL" title="Total MA Calls">Calls</th>
+                                <th title="New Enrollments of prospects">NE</th>
+                                <th title="Plan Change for current members">PC</th>
+                                <th title="Home Visits">HV</th>
+                                <th title="Licensed Agent Callback">LACB</th>
+                                <th title="Raw Conversion Rate - all prospect enrollments and leads divided by total prospect calls">Raw Conv %</th>
+                                <th className="MAR" title="Conversion Rate - only new enrollments over prospect calls">Conv %</th>
+                                <th title="Total PDP Calls">Calls</th>
+                                <th title="New Enrollments of prospects">NE</th>
+                                <th title="Plan Change for current members">PC</th>
+                                <th title="Conversion Rate - only prospect enrollments over prospect calls">Conv %</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            { stats('Today') }
+                            { stats('Yesterday') }
+                            { stats('AEP To Date') }
+                            </tbody>
+                        </Table>
+                    </div>
+                );
+            }
+            else if (sessionStorage.getItem('client') === 'Caresource') {
+                const totalSiteEnrollments = self.props.getTotalSiteEnrollments();
+                return (
+                    <div id="elevate">
+                        <div id="siteGoals" className="container row">
+                            <div className="col-3 goal-label">Team Goal:</div>
+                            { goalsElement("maneSiteGoal", "Your team's progress to reaching MANE goal during AEP",
+                                "col-4 row", "MANE", "siteGoals", totalSiteEnrollments.mane) }
+                        </div>
+                        <div id="generalStats" className="container row">
+
+                            <div className="col-3 goal-label">Agent Goal:</div>
+                            { goalsElement("agentGoal", "Your progress to reaching your site's goal for each agent during AEP",
+                                "col-3 row", "MANE", "agentGoal", self.aetnaCaresourceQuery(conversions['AEP To Date'], 'enrollments', 'MA', 'P')) }
+                        </div>
+                        <Table>
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th className="MAL" title="Total Calls">Calls</th>
+                                <th title="New Enrollments of prospects">New Enrollments</th>
+                                <th title="Home Visits">Home Visits</th>
+                                <th title="Licensed Agent Callback">LACB</th>
+                                <th className="MAR" title="Conversion Rate - only new enrollments over prospect calls">Conversion Rate</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            { stats('Today') }
+                            { stats('Yesterday') }
+                            { stats('AEP To Date') }
+                            </tbody>
+                        </Table>
+                    </div>
+                );
+            }
             else if (sessionStorage.getItem('client') === 'Anthem') return (
                 <div>
                     <div id="generalStats" className="container row">

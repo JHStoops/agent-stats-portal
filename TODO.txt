@@ -6,7 +6,7 @@ Front End
     - Add input validation to the login form
 - stats.js
     - All
-        - Add site-wide goal to agent view -- it shows their contributions.
+        - Make Elevate width match screen size if it's being cropped.
     - Aetna
         - (Modal popup) Take Ben's explanatory text about the bonus based on the agent's % to goal.
             - show their current % to goal in the help modal

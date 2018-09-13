@@ -15,7 +15,7 @@ body {
   left: 0;
   bottom: 0;
   right: 0;
-  background: url('/public/ELEVATE4.4.png');
+  background: url('/ELEVATE4.4.png');
   background-repeat: no-repeat;
   opacity: .1;
   content: "";
@@ -37,19 +37,19 @@ td[colspan] {
 .MAR {
   border-right: 1px solid black;
 }
-#generalStats {
+#generalStats, #siteGoals {
   margin: 20px 0;
 }
 #agentGoalBreakdown, .goalBreakdown, #gpEntries, #gpEntriesWeekly {
   font-size: 20px;
 }
-#agentGoalPercent, .entryCount {
+#agentGoalPercent, .entryCount, .goal-label {
   font-size: 40px;
 }
 #errorMsg {
-    display: none;
-    min-width: 200px;
-    height: 38px;
-    padding: 6px 0 0 10px;
-    margin: 0 10px 0 0;
+  display: none;
+  min-width: 200px;
+  height: 38px;
+  padding: 6px 0 0 10px;
+  margin: 0 10px 0 0;
 }

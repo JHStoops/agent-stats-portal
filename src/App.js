@@ -12,24 +12,29 @@ class App extends Component {
         this.getLoggedIn = this.getLoggedIn.bind(this);
         this.getStats = this.getStats.bind(this);
         this.getWeekly = this.getWeekly.bind(this);
+        this.getTotalSiteEnrollments = this.getTotalSiteEnrollments.bind(this);
         this.state = {
             loggedIn: (sessionStorage.getItem('hash')) ? true : false,
             stats: {},
-            weekly: {}
+            weekly: {},
+            totalSiteEnrollments: {}
+        };
+        this.baseState = {
+            loggedIn: false,
+            stats: {},
+            weekly: {},
+            totalSiteEnrollments: {}
         };
     }
     getLoggedIn(){
         return this.state.loggedIn;
     }
     toggleLoggedIn(b) {
-        if (b === undefined) this.setState({loggedIn: !this.state.loggedIn});
-        else this.setState({loggedIn: b});
-
-        //clear state if logging out
-        if (!this.state.loggedIn) {
-            this.setState({ stats: undefined });
-            this.setState({ weekly: undefined });
+        if (b === false || this.state.loggedIn === true) {
+            sessionStorage.clear();
+            this.setState(Object.assign({}, this.baseState));       //toggle logged out
         }
+        else this.setState({loggedIn: true});                       //toggle logged in
     }
     getStats(){
         if (Object.keys(this.state.stats).length) return this.state.stats;
@@ -45,7 +50,6 @@ class App extends Component {
             })
                 .then(data => data.json())
                 .then(function (stats) {
-                    console.log(stats);
                     self.setState({stats: stats});
                     return stats;
                 })
@@ -71,9 +75,21 @@ class App extends Component {
             })
                 .then( data => data.json() )
                 .then( function(weekly){
-                    console.log(weekly);
                     self.setState({weekly: weekly[0]});
                     return weekly;
+                })
+                .catch( err => console.log(err) );
+        }
+    }
+    getTotalSiteEnrollments(){
+        if (Object.keys(this.state.totalSiteEnrollments).length) return this.state.totalSiteEnrollments;
+        else if (sessionStorage.getItem('hash')){
+            const self = this;
+            return fetch(`/api/siteEnrollments/${sessionStorage.getItem('client')}/${sessionStorage.getItem('site')}`)
+                .then( res => res.json() )
+                .then( totalSiteEnrollments => {
+                    self.setState({totalSiteEnrollments: totalSiteEnrollments[0]});
+                    return totalSiteEnrollments[0];
                 })
                 .catch( err => console.log(err) );
         }
@@ -89,7 +105,7 @@ class App extends Component {
         return (
             <div>
                 <TopNavbar getLoggedIn={ this.getLoggedIn } toggleLoggedIn={ this.toggleLoggedIn } getStats={ this.getStats }/>
-                <Stats getLoggedIn={ this.getLoggedIn} getStats={ this.getStats } getWeekly={ this.getWeekly }/>
+                <Stats getLoggedIn={ this.getLoggedIn} getStats={ this.getStats } getWeekly={ this.getWeekly } getTotalSiteEnrollments={this.getTotalSiteEnrollments} />
             </div>
         );
     }
