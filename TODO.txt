@@ -8,16 +8,20 @@ Front End
     - All
         - Make Elevate width match screen size if it's being cropped.
     - Aetna
-        - (Modal popup) Take Ben's explanatory text about the bonus based on the agent's % to goal.
-            - show their current % to goal in the help modal
         - Spreadsheet with all agents’ stats reported near the end of AEP
     - CareSource
         - Spreadsheet with all agents’ stats reported near the end of AEP
     - Anthem
-        - Don't base enrollment on campaign name if dispo has a different product in its name
-        - Do base enrollment on campaign name if dispo doesn't have a different product in its name
-        - Power hour
-            - Grab timestamps from each call to assign it double value toward entries
+        - Only T2 DNSP calls are to be included (ignore T1 DNSP calls.)
+          	- don't mark T1 DNSP as opportunity.
+          	- Don't count conversions/enrollments from calls that come in as one product (f.ex. T2) but dispositioned as another product (f.ex. HPA)
+          		- These calls only T1 ABCBS/DSNP transferring to T2 -- two birds with one stone.
+        - ignore ABCBS calls (remove abcbs column) -- don't mark as opportunity.
+        - Anthem will have goals soon
+            - Only for licensed agents
+            - Add disclaimer that this is an estimate their commission.
+        - Along with a random winner, include spreadsheet of all agents' stats for that week/AEP
+        - email Michael and Jessica when the portal is ready to be released.
 
 
 /*********************/

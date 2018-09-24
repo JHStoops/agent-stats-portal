@@ -91,7 +91,7 @@ router.route('/stats/:client/:id').get(function(req, res){
     const client = req.params.client.toLowerCase();
     const hash = req.headers['x-authentication'];
     const table = TABLES[client];
-    const aepStartDate = '2018-08-01';  //TODO: update this to actual first day -- set for testing value
+    const aepStartDate = '2018-10-01';  //TODO: update this to actual first day -- set for testing value
     let yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     yesterday = dateFormat(yesterday);
@@ -122,7 +122,7 @@ router.route('/siteEnrollments/:client/:site').get(function(req, res){
     //Grab all stats for a client by site
     const client = req.params.client.toLowerCase();
     const site = req.params.site.toLowerCase().replace('%20', ' ');
-    const startDate ='2018-08-01';
+    const startDate ='2018-10-01';
     const table = TABLES[client];
 
     const query = `

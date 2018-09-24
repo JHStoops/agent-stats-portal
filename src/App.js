@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-// import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap'; //https://reactstrap.github.io/components/modals/
 
 import TopNavbar from "./components/navbar";
 import Stats from "./components/stats";
@@ -63,7 +62,7 @@ class App extends Component {
         if (Object.keys(this.state.weekly).length) return this.state.weekly;
         else if (sessionStorage.getItem('hash')){
             const self = this;
-            const weeklyDrawingStart = "2018-09-03";
+            const weeklyDrawingStart = "2018-10-01";
             return fetch(`/api/report/${sessionStorage.getItem('client')}/${sessionStorage.getItem('site')}/${weeklyDrawingStart}`, {
                 method: 'GET',
                 headers: {

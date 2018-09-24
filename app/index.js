@@ -21,9 +21,9 @@ app.use('/api', api);
 app.use(express.static(WEB.substring(0, WEB.length -3)));
 
 //Start Node Server
-var server = app.listen(config.apiPort, function(err) {
+var server = app.listen(8080, function(err) {
     if (err) console.log(err);
-    console.log(`\nNode server started.\nListening on port ${config.apiPort}...`);
+    console.log(`\nNode server started.\nListening on port 8080...`);
 });
 
 process.on('SIGTERM', gracefulShutdown);//kill (terminate)

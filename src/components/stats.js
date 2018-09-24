@@ -89,10 +89,10 @@ class Stats extends Component {
 
     anthemQuery(stats, query, product){
         //query is the type of data to extract from stats (e.g. enrollments, conversionRate, hv, lacb, etc.)
-        //product is any of these: ma, pdp, ae, ms, ms non-gi, t2, hpa, dnsp, abcbs
+        //product is any of these: ma, pdp, ae, ms, ms non-gi, t2, hpa, dsnp, abcbs
         if (!stats) return 0;
         let result = null;
-        const anthemProducts = ['ma', 'ms', 'ms non-gi', 'pdp', 'ae', 't2', 'hpa', 'dnsp', 'abcbs'];
+        const anthemProducts = ['ma', 'ms', 'ms non-gi', 'pdp', 'ae', 't2', 'hpa', 'dsnp', 'abcbs'];
 
         function licensedVsUnlicensedCriteria(obj){
             if (Number(sessionStorage.getItem('licensed')) === 1) return obj.conversion;    //if licensed
@@ -118,6 +118,15 @@ class Stats extends Component {
             result = stats.reduce(
                 (acc, call) => Number(call.product.toLowerCase().includes('ms') && licensedVsUnlicensedCriteria(call) ) + acc, 0)
                 - this.anthemQuery(stats, 'enrollments', 'ms non-gi');
+        else if (query === 'enrollments' && ( product === 'abcbs' || product === 'dsnp')){
+            result = stats.reduce(
+                (acc, call) => {
+                    return Number(call.product.toLowerCase().includes(product)
+                        && call.dispo.toLowerCase().substr(0, 2) === 't2'
+                        && licensedVsUnlicensedCriteria(call) ) + acc
+                }, 0
+            );
+        }
         else if (query === 'enrollments')
             result = stats.reduce(
                 (acc, call) => Number(call.product.toLowerCase().includes(product) && licensedVsUnlicensedCriteria(call) ) + acc, 0
@@ -185,7 +194,7 @@ class Stats extends Component {
                     <td>{ self.anthemQuery(conversions[attr], 'enrollments',        'ae')       }</td>
                     <td>{ self.anthemQuery(conversions[attr], 'enrollments',        'ms')       }</td>
                     <td>{ self.anthemQuery(conversions[attr], 'enrollments',        'ms non-gi')}</td>
-                    <td>{ self.anthemQuery(conversions[attr], 'enrollments',        'dnsp')     }</td>
+                    <td>{ self.anthemQuery(conversions[attr], 'enrollments',        'dsnp')     }</td>
                     <td>{ self.anthemQuery(conversions[attr], 'enrollments',        'abcbs')    }</td>
                     <td>{ self.anthemQuery(conversions[attr], 'conversionRate',     'PDP')      }</td>
                 </tr>
@@ -206,7 +215,7 @@ class Stats extends Component {
                     <td>{ weekly.ae | 0                             }</td>
                     <td>{ weekly.ms | 0                             }</td>
                     <td>{ weekly['ms non-gi'] | 0                   }</td>
-                    <td>{ weekly.dnsp | 0                           }</td>
+                    <td>{ weekly.dsnp | 0                           }</td>
                     <td>{ weekly.abcbs | 0                          }</td>
                     <td>{ Number(weekly.convRate).toFixed(2) | 0    }</td>
                 </tr>

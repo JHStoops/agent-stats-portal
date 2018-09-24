@@ -1,5 +1,8 @@
 import React from 'react';
-import {
+import {                    //https://reactstrap.github.io/components/modals/
+    Modal,
+    ModalHeader,
+    ModalBody,
     Alert,
     Collapse,
     Navbar,
@@ -18,9 +21,11 @@ export default class TopNavbar extends React.Component {
         super(props);
 
         this.toggle = this.toggle.bind(this);
+        this.toggleModal = this.toggleModal.bind(this);
         this.handleKeyPress = this.handleKeyPress.bind(this);
         this.state = {
             isOpen: false,
+            modal: false,
             username: 'grliddiard',
             password: '',
             errorMsg: ''
@@ -28,6 +33,11 @@ export default class TopNavbar extends React.Component {
     }
     toggle() {
         this.setState({ isOpen: !this.state.isOpen });
+    }
+    toggleModal() {
+        this.setState({
+            modal: !this.state.modal
+        });
     }
     handleChange(e){
         this.setState({ [e.target.name]: e.target.value });
@@ -108,6 +118,24 @@ export default class TopNavbar extends React.Component {
     logout() {
         this.props.toggleLoggedIn(false);
     }
+    incentiveModal() {
+        const client = sessionStorage.getItem('client');
+        const site = sessionStorage.getItem('site');;
+        if (client !== 'Aetna') return ;
+
+        return (
+            <div>
+                <NavLink href="#" onClick={this.toggleModal}>Incentives</NavLink>
+                <Modal isOpen={this.state.modal} size={"lg"} toggle={this.toggleModal}>
+                    <ModalHeader toggle={this.toggleModal}>Incentive System</ModalHeader>
+                    <ModalBody>
+                        <img width="760px" src={"/public/Brochure " + site + ".png"} />
+                        <img width="760px" src={"/public/Brochure All.png"} />
+                    </ModalBody>
+                </Modal>
+            </div>
+        );
+    }
     render() {
         const self = this;
         function handleLogout(e) {
@@ -117,8 +145,9 @@ export default class TopNavbar extends React.Component {
 
         const loggedInState = (this.props.getLoggedIn()) ?
                 (
-                    <NavItem>
-                        <NavLink href="#" onClick={handleLogout}>Logout</NavLink>
+                    <NavItem className="container row" Style={"min-width: 250px"}>
+                        <div className="col-6">{ self.incentiveModal() }</div>
+                        <Button color="danger" className="col-6" onClick={handleLogout}>Logout</Button>
                     </NavItem>
                 )
                 :
