@@ -89,10 +89,10 @@ class Stats extends Component {
 
     anthemQuery(stats, query, product){
         //query is the type of data to extract from stats (e.g. enrollments, conversionRate, hv, lacb, etc.)
-        //product is any of these: ma, pdp, ae, ms, ms non-gi, t2, hpa, dsnp, abcbs
+        //product is any of these: ma, pdp, ae, ms, ms non-gi, t2, hpa, dsnp
         if (!stats) return 0;
         let result = null;
-        const anthemProducts = ['ma', 'ms', 'ms non-gi', 'pdp', 'ae', 't2', 'hpa', 'dsnp', 'abcbs'];
+        const anthemProducts = ['ma', 'ms', 'ms non-gi', 'pdp', 'ae', 't2', 'hpa', 'dsnp'];
 
         function licensedVsUnlicensedCriteria(obj){
             if (Number(sessionStorage.getItem('licensed')) === 1) return obj.conversion;    //if licensed
@@ -118,7 +118,7 @@ class Stats extends Component {
             result = stats.reduce(
                 (acc, call) => Number(call.product.toLowerCase().includes('ms') && licensedVsUnlicensedCriteria(call) ) + acc, 0)
                 - this.anthemQuery(stats, 'enrollments', 'ms non-gi');
-        else if (query === 'enrollments' && ( product === 'abcbs' || product === 'dsnp')){
+        else if (query === 'enrollments' && (product === 'dsnp')){
             result = stats.reduce(
                 (acc, call) => {
                     return Number(call.product.toLowerCase().includes(product)
@@ -195,7 +195,6 @@ class Stats extends Component {
                     <td>{ self.anthemQuery(conversions[attr], 'enrollments',        'ms')       }</td>
                     <td>{ self.anthemQuery(conversions[attr], 'enrollments',        'ms non-gi')}</td>
                     <td>{ self.anthemQuery(conversions[attr], 'enrollments',        'dsnp')     }</td>
-                    <td>{ self.anthemQuery(conversions[attr], 'enrollments',        'abcbs')    }</td>
                     <td>{ self.anthemQuery(conversions[attr], 'conversionRate',     'PDP')      }</td>
                 </tr>
             );
@@ -216,7 +215,6 @@ class Stats extends Component {
                     <td>{ weekly.ms | 0                             }</td>
                     <td>{ weekly['ms non-gi'] | 0                   }</td>
                     <td>{ weekly.dsnp | 0                           }</td>
-                    <td>{ weekly.abcbs | 0                          }</td>
                     <td>{ Number(weekly.convRate).toFixed(2) | 0    }</td>
                 </tr>
             )
@@ -388,7 +386,6 @@ class Stats extends Component {
                             <th title="MS Enrollments">MS</th>
                             <th title="MS Non-GI Enrollments">MS Non-GI</th>
                             <th title="DNSP Enrollments">DNSP</th>
-                            <th title="ABCBS Non-GI Enrollments">ABCBS</th>
                             <th className="MAR" title="Conversion Rate - only enrollments over total opportunities">Conv %</th>
                         </tr>
                         </thead>

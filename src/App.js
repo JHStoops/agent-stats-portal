@@ -58,12 +58,20 @@ class App extends Component {
                 });
         }
     }
+
     getWeekly(){
+        function startOfWeek()
+        {
+            const date = new Date();
+            const diff = date.getDate() - date.getDay();
+            const firstDay = new Date(date.setDate(diff));
+            return firstDay.getFullYear() + '-' + (firstDay.getMonth() + 1) + '-' + firstDay.getDate();
+        }
+
         if (Object.keys(this.state.weekly).length) return this.state.weekly;
         else if (sessionStorage.getItem('hash')){
             const self = this;
-            const weeklyDrawingStart = "2018-10-01";
-            return fetch(`/api/report/${sessionStorage.getItem('client')}/${sessionStorage.getItem('site')}/${weeklyDrawingStart}`, {
+            return fetch(`/api/report/${sessionStorage.getItem('client')}/${sessionStorage.getItem('site')}/${startOfWeek()}`, {
                 method: 'GET',
                 headers: {
                     'accept': 'application/json',
@@ -74,7 +82,7 @@ class App extends Component {
             })
                 .then( data => data.json() )
                 .then( function(weekly){
-                    self.setState({weekly: weekly[0]});
+                    if (Object.keys(weekly).length !== 0) self.setState({weekly: weekly[0]});
                     return weekly;
                 })
                 .catch( err => console.log(err) );

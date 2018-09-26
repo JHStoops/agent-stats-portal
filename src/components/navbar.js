@@ -120,7 +120,7 @@ export default class TopNavbar extends React.Component {
     }
     incentiveModal() {
         const client = sessionStorage.getItem('client');
-        const site = sessionStorage.getItem('site');;
+        const site = sessionStorage.getItem('site');
         if (client !== 'Aetna') return ;
 
         return (
@@ -129,8 +129,8 @@ export default class TopNavbar extends React.Component {
                 <Modal isOpen={this.state.modal} size={"lg"} toggle={this.toggleModal}>
                     <ModalHeader toggle={this.toggleModal}>Incentive System</ModalHeader>
                     <ModalBody>
-                        <img width="760px" src={"/public/Brochure " + site + ".png"} />
-                        <img width="760px" src={"/public/Brochure All.png"} />
+                        <img width="100%" src={"/public/Brochure " + site + ".png"} alt={"Site-specific Incentive Information."} />
+                        <img width="100%" src={"/public/Brochure All.png"} alt={"General Incentive Information."} />
                     </ModalBody>
                 </Modal>
             </div>
@@ -145,7 +145,7 @@ export default class TopNavbar extends React.Component {
 
         const loggedInState = (this.props.getLoggedIn()) ?
                 (
-                    <NavItem className="container row" Style={"min-width: 250px"}>
+                    <NavItem className="container row" style={{minWidth: "250px"}}>
                         <div className="col-6">{ self.incentiveModal() }</div>
                         <Button color="danger" className="col-6" onClick={handleLogout}>Logout</Button>
                     </NavItem>

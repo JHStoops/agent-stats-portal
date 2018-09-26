@@ -12,16 +12,10 @@ Front End
     - CareSource
         - Spreadsheet with all agents’ stats reported near the end of AEP
     - Anthem
-        - Only T2 DNSP calls are to be included (ignore T1 DNSP calls.)
-          	- don't mark T1 DNSP as opportunity.
-          	- Don't count conversions/enrollments from calls that come in as one product (f.ex. T2) but dispositioned as another product (f.ex. HPA)
-          		- These calls only T1 ABCBS/DSNP transferring to T2 -- two birds with one stone.
-        - ignore ABCBS calls (remove abcbs column) -- don't mark as opportunity.
         - Anthem will have goals soon
             - Only for licensed agents
             - Add disclaimer that this is an estimate their commission.
         - Along with a random winner, include spreadsheet of all agents' stats for that week/AEP
-        - email Michael and Jessica when the portal is ready to be released.
 
 
 /*********************/

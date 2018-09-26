@@ -28,14 +28,14 @@ const anthemStatsQuery = `
     count( * ) AS calls,
     sum( 
         if (stag.jobValue = "Licensed Healthcare Agent", 
-            if (conv.opportunity AND conv.campaign_name REGEXP 't2|hpa|ma|pdp|ae|ms|dnsp|abcbs', 1, 0), 
-            if (conv.opportunity AND conv.campaign_name REGEXP 't2|hpa|ma|pdp|ae|ms|dnsp|abcbs', 1, 0) 
+            if (conv.opportunity AND (conv.campaign_name REGEXP 't2|hpa|ma|pdp|ae|ms' OR (conv.campaign_name LIKE 'dsnp' AND conv.call_termination_type LIKE "T2%")), 1, 0), 
+            if (conv.opportunity AND (conv.campaign_name REGEXP 't2|hpa|ma|pdp|ae|ms' OR (conv.campaign_name LIKE 'dsnp' AND conv.call_termination_type LIKE "T2%")), 1, 0) 
         )
     ) AS opportunities,
     sum( 
         if (stag.jobValue = "Licensed Healthcare Agent", 
-            if (conv.conversion AND conv.campaign_name REGEXP 't2|hpa|ma|pdp|ae|ms|dnsp|abcbs', 1, 0), 
-            if (conv.enrollment AND conv.campaign_name REGEXP 't2|hpa|ma|pdp|ae|ms|dnsp|abcbs', 1, 0) 
+            if (conv.conversion AND (conv.campaign_name REGEXP 't2|hpa|ma|pdp|ae|ms' OR (conv.campaign_name LIKE 'dsnp' AND conv.call_termination_type LIKE "T2%")), 1, 0), 
+            if (conv.enrollment AND (conv.campaign_name REGEXP 't2|hpa|ma|pdp|ae|ms' OR (conv.campaign_name LIKE 'dsnp' AND conv.call_termination_type LIKE "T2%")), 1, 0)
         )
     ) AS totalEnrollments,
     sum( 
@@ -110,27 +110,18 @@ const anthemStatsQuery = `
             0
         ) 
     ) AS dnsp,
-    sum( 
-        if( conv.campaign_name LIKE "%ABCBS%", 
-            if (stag.jobValue = "Licensed Healthcare Agent", 
-                if (conv.conversion, 1, 0), 
-                if (conv.enrollment, 1, 0) 
-            ),
-            0
-        ) 
-    ) AS abcbs,
     (
         sum( 
             if (stag.jobValue = "Licensed Healthcare Agent", 
-                if (conv.conversion AND conv.campaign_name REGEXP 't2|hpa|ma|pdp|ae|ms|dnsp|abcbs', 1, 0), 
-                if (conv.enrollment AND conv.campaign_name REGEXP 't2|hpa|ma|pdp|ae|ms|dnsp|abcbs', 1, 0) 
+                if (conv.conversion AND (conv.campaign_name REGEXP 't2|hpa|ma|pdp|ae|ms' OR (conv.campaign_name LIKE 'dsnp' AND conv.call_termination_type LIKE "T2%")), 1, 0), 
+                if (conv.enrollment  AND (conv.campaign_name REGEXP 't2|hpa|ma|pdp|ae|ms' OR (conv.campaign_name LIKE 'dsnp' AND conv.call_termination_type LIKE "T2%")), 1, 0)
             )
         )
         /
         sum( 
             if (stag.jobValue = "Licensed Healthcare Agent", 
-                if (conv.opportunity AND conv.campaign_name REGEXP 't2|hpa|ma|pdp|ae|ms|dnsp|abcbs', 1, 0), 
-                if (conv.opportunity AND conv.campaign_name REGEXP 't2|hpa|ma|pdp|ae|ms|dnsp|abcbs', 1, 0) 
+                if (conv.opportunity AND (conv.campaign_name REGEXP 't2|hpa|ma|pdp|ae|ms' OR (conv.campaign_name LIKE 'dsnp' AND conv.call_termination_type LIKE "T2%")), 1, 0),
+                if (conv.opportunity AND (conv.campaign_name REGEXP 't2|hpa|ma|pdp|ae|ms' OR (conv.campaign_name LIKE 'dsnp' AND conv.call_termination_type LIKE "T2%")), 1, 0)
             )
         ) * 100
     ) AS convRate
