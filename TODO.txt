@@ -12,10 +12,8 @@ Front End
     - CareSource
         - Spreadsheet with all agents’ stats reported near the end of AEP
     - Anthem
-        - Anthem will have goals soon
-            - Only for licensed agents
-            - Add disclaimer that this is an estimate their commission.
-        - Along with a random winner, include spreadsheet of all agents' stats for that week/AEP
+        - Power hour double entries is happening.
+        	- 8am, 10am, 12pm, 2pm, 4pm: 1hr per power hour.
 
 
 /*********************/
@@ -28,3 +26,5 @@ Back End
 Optional -- if time allows
 - README.md
     - make it more personal
+- Anthem
+    - During power hours -- change the page to make it abundantly clear that it's power hour!

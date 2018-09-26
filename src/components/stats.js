@@ -343,61 +343,75 @@ class Stats extends Component {
                     </div>
                 );
             }
-            else if (sessionStorage.getItem('client') === 'Anthem') return (
-                <div>
-                    <div id="generalStats" className="container row">
-                        <div id="gpEntries" className="col-3 row" title="Entries into AEP Grand Prize raffle: &#13; 1 for every 10 T2 quotes &#13; 1 for every 5 HPA quotes &#13; 1 for every 2 successful applications">
-                            <div className="col-8">
-                                <div>Grand Prize</div>
-                                <div>AEP Entries</div>
+            else if (sessionStorage.getItem('client') === 'Anthem') {
+                const today = new Date();
+                return (
+                    <div>
+                        <div id="generalStats" className="container row">
+                            <div id="gpEntries" className="col-3 row" title="Entries into AEP Grand Prize raffle: &#13; 1 for every 10 T2 quotes &#13; 1 for every 5 HPA quotes &#13; 1 for every 2 successful applications">
+                                <div className="col-8">
+                                    <div>Grand Prize</div>
+                                    <div>AEP Entries</div>
+                                </div>
+                                <div className="col-4 entryCount">{
+                                    Math.floor( self.anthemQuery(conversions['AEP To Date'], 'enrollments', 't2')  / 10) +
+                                    Math.floor( self.anthemQuery(conversions['AEP To Date'], 'enrollments', 'hpa') / 5) +
+                                    Math.floor( (
+                                        self.anthemQuery(conversions['AEP To Date'], 'totalEnrollments') -
+                                        self.anthemQuery(conversions['AEP To Date'], 'enrollments', 't2') -
+                                        self.anthemQuery(conversions['AEP To Date'], 'enrollments', 'hpa')
+                                    ) / 2)
+                                }
+                                </div>
                             </div>
-                            <div className="col-4 entryCount">{
-                                Math.floor( self.anthemQuery(conversions['AEP To Date'], 'enrollments', 't2')  / 10) +
-                                Math.floor( self.anthemQuery(conversions['AEP To Date'], 'enrollments', 'hpa') / 5) +
-                                Math.floor( (
-                                    self.anthemQuery(conversions['AEP To Date'], 'totalEnrollments') -
-                                    self.anthemQuery(conversions['AEP To Date'], 'enrollments', 't2') -
-                                    self.anthemQuery(conversions['AEP To Date'], 'enrollments', 'hpa')
-                                ) / 2)
+                            {
+                                //Only display if between 10/14 and 11/10
+                                (today.getTime() > 1539496800000 && today.getTime() < 1541919600000) ? (
+                                    <div id="gpEntriesWeekly" className="offset-1 col-3 row" title="Entries into Weekly Grand Prize raffle: &#13; 1 for every 10 T2 quotes &#13; 1 for every 5 HPA quotes &#13; 1 for every 2 successful applications">
+                                        <div className="col-8">
+                                            <div>Grand Prize</div>
+                                            <div>Week Entries</div>
+                                        </div>
+                                        <div className="col-4 entryCount">{ weeklyDrawings() }
+                                        </div>
+                                    </div>
+                                ) : ('')
                             }
-                            </div>
                         </div>
-                        <div id="gpEntriesWeekly" className="offset-1 col-3 row" title="Entries into Weekly Grand Prize raffle: &#13; 1 for every 10 T2 quotes &#13; 1 for every 5 HPA quotes &#13; 1 for every 2 successful applications">
-                            <div className="col-8">
-                                <div>Grand Prize</div>
-                                <div>Week Entries</div>
-                            </div>
-                            <div className="col-4 entryCount">{ weeklyDrawings() }
-                            </div>
-                        </div>
+                        <Table>
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th className="MAL" title="Total Calls">Calls</th>
+                                <th title="Calls with opportunity of conversion">Opportunities</th>
+                                <th title="Enrollments across all product types">Total Enrollments</th>
+                                <th title="T2 - Quote ID Given">T2</th>
+                                <th title="HPA - Quote ID Given">HPA</th>
+                                <th title="MAPD Enrollments">MAPD</th>
+                                <th title="PDP Enrollments">PDP</th>
+                                <th title="AE Enrollments">AE</th>
+                                <th title="MS Enrollments">MS</th>
+                                <th title="MS Non-GI Enrollments">MS Non-GI</th>
+                                <th title="DSNP Enrollments">DSNP</th>
+                                <th className="MAR" title="Conversion Rate - only enrollments over total opportunities">Conv %</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            { stats('Today') }
+                            { stats('Yesterday') }
+                            { weeklyStats() }
+                            { stats('AEP To Date') }
+                            </tbody>
+                        </Table>
+                        {
+                            //If licensed Agent -- display disclaimer
+                            (sessionStorage.getItem('licensed') == 1) ? (
+                                <b>Disclaimer: These numbers should not be used to determine licensed incentives - these are just quotes.</b>
+                            ) : ('')
+                        }
                     </div>
-                    <Table>
-                        <thead>
-                        <tr>
-                            <th></th>
-                            <th className="MAL" title="Total Calls">Calls</th>
-                            <th title="Calls with opportunity of conversion">Opportunities</th>
-                            <th title="Enrollments across all product types">Total Enrollments</th>
-                            <th title="T2 - Quote ID Given">T2</th>
-                            <th title="HPA - Quote ID Given">HPA</th>
-                            <th title="MAPD Enrollments">MAPD</th>
-                            <th title="PDP Enrollments">PDP</th>
-                            <th title="AE Enrollments">AE</th>
-                            <th title="MS Enrollments">MS</th>
-                            <th title="MS Non-GI Enrollments">MS Non-GI</th>
-                            <th title="DNSP Enrollments">DNSP</th>
-                            <th className="MAR" title="Conversion Rate - only enrollments over total opportunities">Conv %</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        { stats('Today') }
-                        { stats('Yesterday') }
-                        { weeklyStats() }
-                        { stats('AEP To Date') }
-                        </tbody>
-                    </Table>
-                </div>
-            );
+                );
+            }
         }
 
         return (

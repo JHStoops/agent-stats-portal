@@ -102,14 +102,14 @@ const anthemStatsQuery = `
         ) 
     ) AS 'ms non-gi',
     sum( 
-        if( conv.campaign_name LIKE "%DNSP%", 
+        if( conv.campaign_name LIKE "%DSNP%", 
             if (stag.jobValue = "Licensed Healthcare Agent", 
                 if (conv.conversion, 1, 0), 
                 if (conv.enrollment, 1, 0) 
             ),
             0
         ) 
-    ) AS dnsp,
+    ) AS dsnp,
     (
         sum( 
             if (stag.jobValue = "Licensed Healthcare Agent", 
