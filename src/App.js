@@ -32,17 +32,21 @@ class App extends Component {
             totalSiteEnrollments: {}
         };
     }
+
     getEntries(){
         return Math.floor(this.state.t2Entries/10) + Math.floor(this.state.hpaEntries/5) + Math.floor(this.state.restEntries/2);
     }
+
     isPowerHour(hour){
         //Takes only the hour
         return Number( [8, 10, 12, 14, 16].includes(Number(hour)) );
     }
+
     licensedVsUnlicensedCriteria(obj){
         if (Number(sessionStorage.getItem('licensed')) === 1) return obj.conversion;    //if licensed
         return obj.enrollment;                                                          //if unlicensed
     }
+
     countEntries(stats){
         const self = this;
         const anthemProducts = [/ma/i, /ms/i, /pdp/i, /ae/i, /dsnp/i, /hpa/i, /t2/i];
@@ -72,9 +76,11 @@ class App extends Component {
         self.setState({hpaEntries: hpaEntries});
         self.setState({t2Entries: t2Entries});
     }
+
     getLoggedIn(){
         return this.state.loggedIn;
     }
+
     toggleLoggedIn(b) {
         if (b === false || this.state.loggedIn === true) {
             sessionStorage.clear();
@@ -82,6 +88,7 @@ class App extends Component {
         }
         else this.setState({loggedIn: true});                       //toggle logged in
     }
+
     getStats(){
         if (Object.keys(this.state.stats).length) return this.state.stats;
         else if (sessionStorage.getItem('hash') === 'nuicsdj89fhsd789fnsdui') return this.state.stats;
@@ -131,12 +138,13 @@ class App extends Component {
             })
                 .then( data => data.json() )
                 .then( function(weekly){
-                    if (Object.keys(weekly).length !== 0) self.setState({weekly: weekly[0]});
+                    if (Object.keys(weekly).length !== 0) self.setState({weekly: weekly});
                     return weekly;
                 })
                 .catch( err => console.log(err) );
         }
     }
+
     getTotalSiteEnrollments(){
         if (Object.keys(this.state.totalSiteEnrollments).length) return this.state.totalSiteEnrollments;
         else if (sessionStorage.getItem('hash')){
@@ -150,6 +158,7 @@ class App extends Component {
                 .catch( err => console.log(err) );
         }
     }
+
     componentWillMount() {
         if (sessionStorage.getItem('hash') === 'nuicsdj89fhsd789fnsdui') {
             this.setState({ loggedIn: true});

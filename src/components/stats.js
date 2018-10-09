@@ -16,22 +16,22 @@ class Stats extends Component {
                 'Aetna': {
                     'MANE': {
                         'Provo': 3000,
-                        'Salt Lake City': 56,
-                        'Sawgrass': 1222,
+                        'Sandy': 56,
+                        'Plantation': 1222,
                         'San Antonio': 1222,
                         'Memphis': 56
                     },
                     'PDPNE': {
                         'Provo': 8960,
-                        'Salt Lake City': 9600,
-                        'Sawgrass': 320,
+                        'Sandy': 9600,
+                        'Plantation': 320,
                         'San Antonio': 320,
                         'Memphis': 12800
                     }
                 },
                 'Caresource': {
                     'MANE': {
-                        'Salt Lake City': 1200
+                        'Sandy': 1200
                     }
                 }
             },
@@ -39,15 +39,15 @@ class Stats extends Component {
                 'Aetna': {
                     'MANE': {
                         'Provo': 33,
-                        'Salt Lake City': 1,
-                        'Sawgrass': 38,
+                        'Sandy': 1,
+                        'Plantation': 38,
                         'San Antonio': 18,
                         'Memphis': 1
                     },
                     'PDPNE': {
                         'Provo': 97,
-                        'Salt Lake City': 160,
-                        'Sawgrass': 10,
+                        'Sandy': 160,
+                        'Plantation': 10,
                         'San Antonio': 5,
                         'Memphis': 71
                     }
@@ -55,11 +55,11 @@ class Stats extends Component {
                 'Anthem': {
                     'San Antonio': 120,
                     'Roy': 100,
-                    'Sawgrass': 150
+                    'Plantation': 150
                 },
                 'Caresource': {
                     'MANE': {
-                        'Salt Lake City': 48
+                        'Sandy': 48
                     }
                 }
             }
@@ -88,6 +88,11 @@ class Stats extends Component {
         else if (query === 'homeVisits') result = stats.reduce((acc, call) => Number(call.hv) + acc, 0);
         else if (query === 'lacb') result = stats.reduce((acc, call) => Number(call.lacb) + acc, 0);
         else if (query === 'totalCalls') result = stats.reduce((acc, call) => Number(call.product === product) + acc, 0);
+        else if (query === 'entries') {
+            const enrollmentsMANE = this.aetnaCaresourceQuery(stats, 'enrollments', 'MA', 'P');
+            const enrollmentsPDPNE = this.aetnaCaresourceQuery(stats, 'enrollments', 'PDP', 'P');
+            result = Math.floor( (enrollmentsMANE + enrollmentsPDPNE ) / 5);
+        }
 
         if (result === null || isNaN(result) || result === undefined) return 0;
         return result;
@@ -170,8 +175,17 @@ class Stats extends Component {
             };
 
         function stats(conv, name, client) {
+            const aetnaEntries = function(){
+                if ( !['Yesterday', 'Today', 'AEP To Date', 'This Week'].includes(name) )
+                    return <td> {self.aetnaCaresourceQuery(conv, 'entries')} </td>;
+            };
+            const anthemEntries = function(){
+                if ( !['Yesterday', 'Today', 'AEP To Date', 'This Week'].includes(name) )
+                    return <td>{ adminAnthemEntries(conv) }</td>;
+            };
+
             if (client === 'Aetna') return (
-                <tr>
+                <tr key={name}>
                     <th scope="row">{ name }</th>
                     <td className="MAL">
                         { self.aetnaCaresourceQuery(conv, 'totalCalls',        'MA')       }</td>
@@ -186,11 +200,12 @@ class Stats extends Component {
                     <td>{ self.aetnaCaresourceQuery(conv, 'enrollments',       'PDP', 'P') }</td>
                     <td>{ self.aetnaCaresourceQuery(conv, 'enrollments',       'PDP', 'M') }</td>
                     <td>{ self.aetnaCaresourceQuery(conv, 'conversionRate',    'PDP')      }</td>
+                    { aetnaEntries() }
                 </tr>
             );
 
             else if (client === 'Caresource') return (
-                <tr>
+                <tr key={name}>
                     <th scope="row">{ name }</th>
                     <td className="MAL">
                         { self.aetnaCaresourceQuery(conv, 'totalCalls',     'MA')       }</td>
@@ -202,7 +217,7 @@ class Stats extends Component {
             );
 
             else if (client === 'Anthem') return (
-                <tr>
+                <tr key={name}>
                     <th scope="row">{ name }</th>
                     <td className="MAL">
                         { self.anthemQuery(conv, 'totalCalls',         'MA')       }</td>
@@ -217,6 +232,7 @@ class Stats extends Component {
                     <td>{ self.anthemQuery(conv, 'enrollments',        'ms non-gi')}</td>
                     <td>{ self.anthemQuery(conv, 'enrollments',        'dsnp')     }</td>
                     <td>{ self.anthemQuery(conv, 'conversionRate',     'PDP')      }</td>
+                    { anthemEntries() }
                 </tr>
             );
         }
@@ -262,6 +278,7 @@ class Stats extends Component {
         function tableHeaders(client){
             const HEADERS = {
                 "Aetna": [
+                    { className: '', title: '', content: ''},
                     { className: '', title: 'Total MA Calls', content: 'Calls'},
                     { className: '', title: 'MA New Enrollments of prospects', content: 'NE'},
                     { className: '', title: 'MA Plan Change for current members', content: 'PC'},
@@ -275,6 +292,7 @@ class Stats extends Component {
                     { className: '', title: 'Conversion Rate - only prospect enrollments over prospect calls', content: 'Conv %'}
                 ],
                 "Caresource": [
+                    { className: '', title: '', content: ''},
                     { className: '', title: 'Total Calls', content: 'Calls'},
                     { className: '', title: 'New Enrollments of prospects', content: 'New Enrollments'},
                     { className: '', title: 'Home Visits', content: 'Home Visits'},
@@ -282,6 +300,7 @@ class Stats extends Component {
                     { className: '', title: 'Conversion Rate - only new enrollments over prospect calls', content: 'Conversion Rate'}
                 ],
                 "Anthem": [
+                    { className: '', title: '', content: ''},
                     { className: '', title: 'Total Calls', content: 'Calls'},
                     { className: '', title: 'Calls with opportunity of conversion', content: 'Opportunities'},
                     { className: '', title: 'Enrollments across all product types', content: 'Total Enrollments'},
@@ -298,9 +317,16 @@ class Stats extends Component {
             };
 
             if (HEADERS[client] === undefined) return;
+
+            const entriesGP = function() {
+                if (self.state.adminClient.toLowerCase() === 'aetna') return <th className="entriesGP" title="Grand Prize Entries"> GP Entries </th>;
+                if (self.state.adminClient.toLowerCase() === 'anthem') return <th className="entriesGP" title="Grand Prize Entries"> GP Entries </th>;
+            };
+
             return (
                 <tr>
                     { HEADERS[client].map( el => <th className={el.className} title={el.title} key={el.title}>{el.content}</th> ) }
+                    { entriesGP() }
                 </tr>
             );
         }
@@ -441,18 +467,100 @@ class Stats extends Component {
             }
         }
 
+        function isPowerHour(hour){
+            //Takes only the hour
+            return Number( [8, 10, 12, 14, 16].includes(Number(hour)) );
+        }
+
+        function adminAnthemEntries(stats){
+            anthemEntries(stats);
+            return Math.floor(sessionStorage.getItem('t2Entries')/10) + Math.floor(sessionStorage.getItem('hpaEntries')/5) + Math.floor(sessionStorage.getItem('restEntries')/2);
+        }
+
+        function anthemEntries(stats){
+            const anthemProducts = [/ma/i, /ms/i, /pdp/i, /ae/i, /dsnp/i, /hpa/i, /t2/i];
+            let hpaEntries = 0;
+            let t2Entries = 0;
+            let restEntries = stats.reduce(
+                (acc, call) => {
+                    if (call.product === null) return acc;
+                    if (self.licensedVsUnlicensedCriteria(call) === 0) return acc;
+                    let isEligiableProduct = false;
+                    let i = 0;
+                    for (; i < anthemProducts.length; i++){
+                        if ( call.product.match(anthemProducts[i]) ) {
+                            isEligiableProduct = true;
+                            break;
+                        }
+                    }
+
+                    const addedEntries = (isEligiableProduct) ? 1 + isPowerHour( (new Date(call.datetime)).getHours() ) : 0;
+                    if (i === 5) hpaEntries += addedEntries;
+                    else if (i === 6) t2Entries += addedEntries;
+                    return acc + addedEntries;
+                }, 0
+            );
+
+            sessionStorage.setItem('restEntries', String(restEntries - hpaEntries - t2Entries));
+            sessionStorage.setItem('hpaEntries', String(hpaEntries));
+            sessionStorage.setItem('t2Entries', String(t2Entries));
+        }
+
         function adminGrabStats(){
-            fetch(`/api/siteEnrollments/${self.state.adminClient}/${self.state.adminSite}/${self.state.adminStartDate}/${(self.state.adminStartDate) ? self.state.adminEndDate : '' }`)
+            // Reset adminStats
+            self.setState({adminStats: []});
+
+            // Save data from form
+            let site =      document.getElementById('sSite').value;
+            let client =    document.getElementById('sClient').value;
+            let startDate = document.getElementById('startDate').value
+            let endDate =   document.getElementById('endDate').value
+
+            self.setState({adminSite: site});
+            self.setState({adminClient: client});
+            self.setState({adminStartDate: endDate});
+            self.setState({adminEndDate: startDate});
+
+            // Grab data from DB
+            fetch(`/api/report/${client}/${site}/${startDate}/${(endDate) ? endDate : '' }`)
                 .then( res => res.json() )
                 .then( stats => self.setState({adminStats: stats}) )
                 .catch( err => console.log(err) );
         }
 
-        function adminStats(){
-            if (self.state.adminStats === []) return;
-            //let jsx = self.state.adminStats.map( el => stats(el, name, client));
+        function adminStats(client){
+            if (self.state.adminStats.length === 0) return;
 
-            return '';
+            // First, group all calls by agents: {'agent_id1': [...calls], 'agent_id2': [...calls], ... }
+            let agentStats = {};
+            self.state.adminStats.forEach( function(el) {
+                if ( !agentStats.hasOwnProperty(el.userid) ) agentStats[el.userid] = {firstName: el.firstName, lastName: el.lastName, calls: []};
+                let deepCopy = {};
+                Object.assign(deepCopy, el);
+                delete deepCopy.firstName;
+                delete deepCopy.lastName;
+                agentStats[el.userid].calls.push(deepCopy);
+            });
+
+            // Sort by lastName in ascending order
+            const sorting = function(a, b){
+                if(agentStats[a].lastName < agentStats[b].lastName) return -1;
+                if(agentStats[a].lastName > agentStats[b].lastName) return 1;
+
+                if(agentStats[a].firstName < agentStats[b].firstName) return -1;
+                if(agentStats[a].firstName > agentStats[b].firstName) return 1;
+                return 0;
+            };
+
+            // Generate the HTML/JSX to be displayed
+            let jsx = [];
+            Object.keys(agentStats).sort(sorting).forEach( function(key){
+                let name = '';
+                if (agentStats.hasOwnProperty(key)) name = agentStats[key].lastName + ', ' + agentStats[key].firstName;
+                return jsx.push( stats(agentStats[key].calls, name, client) );
+            });
+
+            return jsx;
         }
 
         function adminTable(){
@@ -463,7 +571,7 @@ class Stats extends Component {
                             { tableHeaders(self.state.adminClient) }
                         </thead>
                         <tbody>
-                        { adminStats() }
+                        { adminStats(self.state.adminClient) }
                         </tbody>
                     </Table>
                 </div>
@@ -478,13 +586,13 @@ class Stats extends Component {
                             <Col md={3}>
                                 <FormGroup>
                                     <Label for="sSite">Site</Label>
-                                    <Input type="select" name="site" id="sSite" onChange={ (e) => self.setState({adminSite: e.target.value}) }>
+                                    <Input type="select" name="site" id="sSite" >
                                         <option value=""></option>
                                         <option value="Provo">PRV</option>
                                         <option value="San Antonio">SAT</option>
                                         <option value="Memphis">MEM</option>
-                                        <option value="Salt Lake City">SLC</option>
-                                        <option value="Sawgrass">SAW</option>
+                                        <option value="Sandy">SLC</option>
+                                        <option value="Plantation">SAW</option>
                                         <option value="Roy">ROY</option>
                                     </Input>
                                 </FormGroup>
@@ -492,7 +600,7 @@ class Stats extends Component {
                             <Col md={3}>
                                 <FormGroup>
                                     <Label for="sClient">Client</Label>
-                                    <Input type="select" name="client" id="sClient" onChange={ (e) => self.setState({adminClient: e.target.value}) }>
+                                    <Input type="select" name="client" id="sClient" >
                                         <option value=""></option>
                                         <option value="Aetna">Aetna</option>
                                         <option value="Caresource">CareSource</option>
@@ -503,15 +611,15 @@ class Stats extends Component {
                             <Col md={2}>
                                 <FormGroup>
                                     <Label for="startDate">Start Date</Label>
-                                    <Input type="date" name="startDate" id="startDate" min="2018-10-01" max="2019-01-31"
-                                           placeholder="Start Date" onChange={ (e) => self.setState({adminStartDate: e.target.value}) } />
+                                    <Input type="date" name="startDate" id="startDate" min="2018-10-01" max="2019-01-31" value="2018-10-01"
+                                           placeholder="Start Date" />
                                 </FormGroup>
                             </Col>
                             <Col md={2}>
                                 <FormGroup>
                                     <Label for="endDate">End Date</Label>
                                     <Input type="date" name="endDate" id="endDate"  min="2018-10-01" max="2019-01-31"
-                                           placeholder="End Date" onChange={ (e) => self.setState({adminEndDate: e.target.value}) } />
+                                           placeholder="End Date" />
                                 </FormGroup>
                             </Col>
                             <Col md={2}>
@@ -521,8 +629,7 @@ class Stats extends Component {
                             </Col>
                         </Row>
                     </Form>
-                    {/*{ (self.state.adminStats.length > 0) ? adminTable() : '' }*/}
-                    { adminTable() }
+                    { (self.state.adminStats.length > 0) ? adminTable() : '' }
                 </div>
             );
         }

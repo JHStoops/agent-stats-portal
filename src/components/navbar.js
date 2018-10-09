@@ -75,28 +75,28 @@ export default class TopNavbar extends React.Component {
         const self = this;
         //TODO: add input validation
 
-        fetch('/api/login', {
-            method: 'POST',
-            body: JSON.stringify({username: this.state.username, password: this.state.password}),
-            headers: {
-                'accept': 'application/json',
-                'content-type': 'application/json'
-            }
-        })
-            .then( function(res) {
-                if (res.status !== 201) {
-                    self.triggerErrorMessage('Incorrect credentials');
-                    throw new Error('Failed to log in');
-                }
-                return res.json();
-            })
-            .then( function(data){
-                if (data.username.toLowerCase() === 'admin' && data.hash === 'nuicsdj89fhsd789fnsdui') {
-                    sessionStorage.setItem('username', data.username);
-                    sessionStorage.setItem('hash', data.hash);
-                    self.props.toggleLoggedIn(true);
-                }
-                else {
+        // fetch('/api/login', {
+        //     method: 'POST',
+        //     body: JSON.stringify({username: this.state.username, password: this.state.password}),
+        //     headers: {
+        //         'accept': 'application/json',
+        //         'content-type': 'application/json'
+        //     }
+        // })
+        //     .then( function(res) {
+        //         if (res.status !== 201) {
+        //             self.triggerErrorMessage('Incorrect credentials');
+        //             throw new Error('Failed to log in');
+        //         }
+        //         return res.json();
+        //     })
+        //     .then( function(data){
+        //         if (data.username.toLowerCase() === 'admin' && data.hash === 'nuicsdj89fhsd789fnsdui') {
+        //             sessionStorage.setItem('username', data.username);
+        //             sessionStorage.setItem('hash', data.hash);
+        //             self.props.toggleLoggedIn(true);
+        //         }
+        //         else {
                     fetch('/api/me', {
                         method: 'POST',
                         body: JSON.stringify({username: self.state.username}),
@@ -127,9 +127,9 @@ export default class TopNavbar extends React.Component {
                             self.props.toggleLoggedIn(true);
                         })
                         .catch( err => console.log(err) );
-                }
-            })
-            .catch( err => console.log(err) )
+            //     }
+            // })
+            // .catch( err => console.log(err) )
     }
     logout() {
         this.props.toggleLoggedIn(false);

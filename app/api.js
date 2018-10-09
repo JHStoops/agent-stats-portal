@@ -92,7 +92,7 @@ router.route('/me').post(function(req, res){
 
 router.route('/stats/:client/:id').get(function(req, res){
     const id = req.params.id.toLowerCase();
-    const client = req.params.client.toLowerCase();
+    const client = req.params.client.toLowerCase().replace('%20', ' ');
     const hash = req.headers['x-authentication'];
     const table = TABLES[client];
     const aepStartDate = '2018-10-01';  //TODO: update this to actual first day -- set for testing value
@@ -131,7 +131,7 @@ router.route('/stats/:client/:id').get(function(req, res){
 
 router.route('/siteEnrollments/:client/:site').get(function(req, res){
     //Grab all stats for a client by site
-    const client = req.params.client.toLowerCase();
+    const client = req.params.client.toLowerCase().replace('%20', ' ');
     const site = req.params.site.toLowerCase().replace('%20', ' ');
     const startDate ='2018-10-01';
     const table = TABLES[client];
@@ -154,39 +154,21 @@ router.route('/siteEnrollments/:client/:site').get(function(req, res){
 
 router.route('/report/:client/:site/:startDate/:endDate?').get(function(req, res){
     //Grab all stats for a client by site
-    const client = req.params.client.toLowerCase();
-    const site = req.params.site.toLowerCase();
+    const client = req.params.client.toLowerCase().replace('%20', ' ');
+    const site = req.params.site.toLowerCase().replace('%20', ' ');
     const startDate = req.params.startDate;
     const endDate = req.params.endDate ? req.params.endDate : null;
-    let agent = (req.headers['username']) ? req.headers['username'] : null;
     const table = TABLES[client];
 
     const query = `
-        SELECT stag.familyName AS lastName, stag.givenName AS firstName, stag.username,
-            # Aetna and CareSource
-            ${ (client !== 'anthem') ? 'sum( if(conv.product = "MA", 1, 0) ) AS maCalls,' : '' }
-            ${ (client !== 'anthem') ? 'sum( if(conv.product = "MA" AND conv.type = "P" AND enrollment = 1, 1, 0) ) AS mane,' : '' }
-            ${ (client === 'aetna')  ? 'sum( if(conv.product = "MA" AND conv.type = "M" AND enrollment = 1, 1, 0) ) AS mapc,' : '' }
-            ${ (client !== 'anthem') ? 'sum( if(conv.home_appt = 1, 1, 0) ) AS hv,' : '' }
-            ${ (client !== 'anthem') ? 'sum( if(conv.lacb = 1, 1, 0) ) AS lacb,' : '' }
-            ${ (client === 'aetna')  ? 'ifnull( sum( if( conv.product = "MA" AND conv.type = "P" AND (conv.enrollment = 1 OR conv.home_appt = 1 OR conv.lacb = 1 ), 1, 0) ) / sum( if(conv.product = "MA" AND conv.type = "P", 1, 0) ) * 100, 0 ) AS rawConvRate,' : '' }
-            ${ (client !== 'anthem') ? 'ifnull( sum( if(conv.product = "MA" AND conv.type = "P" AND enrollment = 1, 1, 0) ) / sum( if(conv.product = "MA" AND conv.type = "P", 1, 0) ) * 100, 0 ) AS maConvRate,' : ''}
-            ${ (client === 'aetna')  ? 'sum( if(conv.product = "PDP", 1, 0) ) AS pdpcalls,' : '' }
-            ${ (client === 'aetna')  ? 'sum( if(conv.product = "PDP" AND conv.type = "P" AND enrollment = 1, 1, 0) ) AS pdpne,' : '' }
-            ${ (client === 'aetna')  ? 'sum( if(conv.product = "PDP" AND conv.type = "M" AND enrollment = 1, 1, 0) ) AS pdppc,' : '' }
-            ${ (client === 'aetna')  ? 'ifnull( sum( if(conv.product = "PDP" AND conv.type = "P" AND enrollment = 1, 1, 0) ) / sum( if(conv.product = "PDP" AND conv.type = "P", 1, 0) ) * 100, 0 ) AS pdpConvRate' : '' }
-            
-            # Anthem Stats
-            ${ (client === 'anthem') ? db.anthemStatsQuery : ''}
-        FROM iex_data.stag_adp_employeeinfo AS stag, iex_data.nice_agentroster_table AS nice, ${ table.table } AS conv
-        WHERE stag.positionID = nice.adp_id
-            AND nice.callpro_userid = conv.employee_id
-            ${ agent ? 'AND stag.username = "' + agent + '"' : '' }
-            AND stag.positionStatusCode != 'T'
-            AND stag.homeWorkLocationCity = "${ site }"
-            AND conv.${table.date} > "${ startDate }"
-            ${ endDate !== null ? 'AND conv.' + table.date + ' <= "' + endDate + '"' : '' }
-        GROUP BY stag.username;
+    SELECT stag.familyName AS lastName, stag.givenName AS firstName, stag.username, nice.callpro_userid AS userid, ${table.returnFields.map(val => val.field + ' AS ' + val.as).join(', ')} 
+    FROM iex_data.stag_adp_employeeinfo AS stag, iex_data.nice_agentroster_table AS nice, ${ table.table } AS conv
+    WHERE stag.positionID = nice.adp_id
+        AND nice.callpro_userid = conv.employee_id
+        AND stag.positionStatusCode != 'T'
+        AND stag.homeWorkLocationCity = "${ site }"
+        AND conv.${table.date} > "${ startDate }"
+        ${ endDate !== null ? 'AND conv.' + table.date + ' <= "' + endDate + '"' : '' };
     `;
 
     db.con.query(query, function(err, rows){

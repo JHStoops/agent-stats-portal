@@ -8,6 +8,7 @@ Front End
 - stats.js
     - (All) make stats download page.
     - (Anthem) Make call_termination_id IN (171, 222, 271, 362, 375, 376, 400, 415, 434) count as enrollments for Lic. Agents
+    - (Anthem) Fix getWeekly() in App.js to work with raw call data.
 
 
 
