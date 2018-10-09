@@ -1,10 +1,16 @@
 import React, {Component} from 'react';
 import { Table } from 'reactstrap';
+import { Col, Row, Button, Form, FormGroup, Label, Input } from 'reactstrap';   // For admin table generation
 
 class Stats extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            adminStats: [],
+            adminSite: '',
+            adminClient: '',
+            adminStartDate: '',
+            adminEndDate: '',
             loggedId: this.props.getLoggedIn,
             siteGoals: {
                 'Aetna': {
@@ -87,49 +93,64 @@ class Stats extends Component {
         return result;
     }
 
+    licensedVsUnlicensedCriteria(obj){
+        if (Number(sessionStorage.getItem('licensed')) === 1) return obj.conversion;    //if licensed
+        return obj.enrollment;                                                          //if unlicensed
+    }
+
     anthemQuery(stats, query, product){
         //query is the type of data to extract from stats (e.g. enrollments, conversionRate, hv, lacb, etc.)
         //product is any of these: ma, pdp, ae, ms, ms non-gi, t2, hpa, dsnp
         if (!stats) return 0;
+        if (stats.length === 0) return 0;
         let result = null;
         const anthemProducts = ['ma', 'ms', 'ms non-gi', 'pdp', 'ae', 't2', 'hpa', 'dsnp'];
-
-        function licensedVsUnlicensedCriteria(obj){
-            if (Number(sessionStorage.getItem('licensed')) === 1) return obj.conversion;    //if licensed
-            return obj.enrollment;                                                          //if unlicensed
-        }
 
         if (query === 'totalCalls') result = stats.length;
         else if (query === 'opportunities')
             result = stats.reduce(
-                (acc, call) => Number(call.opportunity && anthemProducts.reduce(
-                    (bool, prod) => Number(call.product.toLowerCase().includes(prod)) | bool, 0)
-                ) + acc, 0
+                (acc, call) => {
+                    if (call.product === null) return acc;
+                    return Number(call.opportunity && anthemProducts.reduce(
+                        (bool, prod) => Number(call.product.toLowerCase().includes(prod)) | bool, 0)
+                    ) + acc;
+                }, 0
             );
         else if (query === 'totalEnrollments')
             result = stats.reduce(
-                (acc, call) => Number(licensedVsUnlicensedCriteria(call) && anthemProducts.reduce(
-                    (bool, prod) => Number(call.product.toLowerCase().includes(prod)) | bool, 0)
-                ) + acc, 0
+                (acc, call) => {
+                    if (call.product === null) return acc;
+                    return Number(this.licensedVsUnlicensedCriteria(call) && anthemProducts.reduce(
+                        (bool, prod) => Number(call.product.toLowerCase().includes(prod)) | bool, 0)
+                    ) + acc
+                }, 0
             );
         else if (query === 'conversionRate')
             result = Number(this.anthemQuery(stats, 'totalEnrollments') / this.anthemQuery(stats, 'opportunities') * 100).toFixed(2);
         else if (query === 'enrollments' && product === 'ms')
             result = stats.reduce(
-                (acc, call) => Number(call.product.toLowerCase().includes('ms') && licensedVsUnlicensedCriteria(call) ) + acc, 0)
+                (acc, call) => {
+                    if (call.product === null) return acc;
+                    const msEnroll = Number( call.product.toLowerCase().includes(product) && this.licensedVsUnlicensedCriteria(call) );
+                    return msEnroll + acc;
+                }, 0)
                 - this.anthemQuery(stats, 'enrollments', 'ms non-gi');
-        else if (query === 'enrollments' && (product === 'dsnp')){
+        else if (query === 'enrollments' && product === 'dsnp'){
             result = stats.reduce(
                 (acc, call) => {
-                    return Number(call.product.toLowerCase().includes(product)
-                        && call.dispo.toLowerCase().substr(0, 2) === 't2'
-                        && licensedVsUnlicensedCriteria(call) ) + acc
+                    if (call.product === null) return acc;
+                    const dsnpEnroll = Number( call.product.toLowerCase().includes(product) && this.licensedVsUnlicensedCriteria(call) );
+                    return Number(dsnpEnroll && call.dispo.toLowerCase().substr(0, 2) === 't2' ) + acc
                 }, 0
             );
         }
         else if (query === 'enrollments')
             result = stats.reduce(
-                (acc, call) => Number(call.product.toLowerCase().includes(product) && licensedVsUnlicensedCriteria(call) ) + acc, 0
+                (acc, call) => {
+                    if (call.product === null) return acc;
+                    const enroll = Number(call.product.toLowerCase().includes(product) && this.licensedVsUnlicensedCriteria(call) );
+                    return enroll + acc;
+                }, 0
             );
         if (result === null || isNaN(result) || result === undefined) return 0;
         return result;
@@ -148,54 +169,54 @@ class Stats extends Component {
                 return (isNaN(product)) ? 0 : product;
             };
 
-        function stats(attr) {
-            if (sessionStorage.getItem('client') === 'Aetna') return (
+        function stats(conv, name, client) {
+            if (client === 'Aetna') return (
                 <tr>
-                    <th scope="row">{attr}</th>
+                    <th scope="row">{ name }</th>
                     <td className="MAL">
-                        { self.aetnaCaresourceQuery(conversions[attr], 'totalCalls',        'MA')       }</td>
-                    <td>{ self.aetnaCaresourceQuery(conversions[attr], 'enrollments',       'MA', 'P')  }</td>
-                    <td>{ self.aetnaCaresourceQuery(conversions[attr], 'enrollments',       'MA', 'M')  }</td>
-                    <td>{ self.aetnaCaresourceQuery(conversions[attr], 'homeVisits')                    }</td>
-                    <td>{ self.aetnaCaresourceQuery(conversions[attr], 'lacb')                          }</td>
-                    <td>{ self.aetnaCaresourceQuery(conversions[attr], 'rawConversionRate', 'MA')       }</td>
+                        { self.aetnaCaresourceQuery(conv, 'totalCalls',        'MA')       }</td>
+                    <td>{ self.aetnaCaresourceQuery(conv, 'enrollments',       'MA', 'P')  }</td>
+                    <td>{ self.aetnaCaresourceQuery(conv, 'enrollments',       'MA', 'M')  }</td>
+                    <td>{ self.aetnaCaresourceQuery(conv, 'homeVisits')                    }</td>
+                    <td>{ self.aetnaCaresourceQuery(conv, 'lacb')                          }</td>
+                    <td>{ self.aetnaCaresourceQuery(conv, 'rawConversionRate', 'MA')       }</td>
                     <td className="MAR">
-                        { self.aetnaCaresourceQuery(conversions[attr], 'conversionRate',    'MA')       }</td>
-                    <td>{ self.aetnaCaresourceQuery(conversions[attr], 'totalCalls',        'PDP')      }</td>
-                    <td>{ self.aetnaCaresourceQuery(conversions[attr], 'enrollments',       'PDP', 'P') }</td>
-                    <td>{ self.aetnaCaresourceQuery(conversions[attr], 'enrollments',       'PDP', 'M') }</td>
-                    <td>{ self.aetnaCaresourceQuery(conversions[attr], 'conversionRate',    'PDP')      }</td>
+                        { self.aetnaCaresourceQuery(conv, 'conversionRate',    'MA')       }</td>
+                    <td>{ self.aetnaCaresourceQuery(conv, 'totalCalls',        'PDP')      }</td>
+                    <td>{ self.aetnaCaresourceQuery(conv, 'enrollments',       'PDP', 'P') }</td>
+                    <td>{ self.aetnaCaresourceQuery(conv, 'enrollments',       'PDP', 'M') }</td>
+                    <td>{ self.aetnaCaresourceQuery(conv, 'conversionRate',    'PDP')      }</td>
                 </tr>
             );
 
-            else if (sessionStorage.getItem('client') === 'Caresource') return (
+            else if (client === 'Caresource') return (
                 <tr>
-                    <th scope="row">{attr}</th>
+                    <th scope="row">{ name }</th>
                     <td className="MAL">
-                        { self.aetnaCaresourceQuery(conversions[attr], 'totalCalls',     'MA')       }</td>
-                    <td>{ self.aetnaCaresourceQuery(conversions[attr], 'enrollments',    'MA', 'P')  }</td>
-                    <td>{ self.aetnaCaresourceQuery(conversions[attr], 'homeVisits')                 }</td>
-                    <td>{ self.aetnaCaresourceQuery(conversions[attr], 'lacb')                       }</td>
-                    <td>{ self.aetnaCaresourceQuery(conversions[attr], 'conversionRate', 'MA')       }</td>
+                        { self.aetnaCaresourceQuery(conv, 'totalCalls',     'MA')       }</td>
+                    <td>{ self.aetnaCaresourceQuery(conv, 'enrollments',    'MA', 'P')  }</td>
+                    <td>{ self.aetnaCaresourceQuery(conv, 'homeVisits')                 }</td>
+                    <td>{ self.aetnaCaresourceQuery(conv, 'lacb')                       }</td>
+                    <td>{ self.aetnaCaresourceQuery(conv, 'conversionRate', 'MA')       }</td>
                 </tr>
             );
 
-            else if (sessionStorage.getItem('client') === 'Anthem') return (
+            else if (client === 'Anthem') return (
                 <tr>
-                    <th scope="row">{attr}</th>
+                    <th scope="row">{ name }</th>
                     <td className="MAL">
-                        { self.anthemQuery(conversions[attr], 'totalCalls',         'MA')       }</td>
-                    <td>{ self.anthemQuery(conversions[attr], 'opportunities',      'MA')       }</td>
-                    <td>{ self.anthemQuery(conversions[attr], 'totalEnrollments')               }</td>
-                    <td>{ self.anthemQuery(conversions[attr], 'enrollments',        't2')       }</td>
-                    <td>{ self.anthemQuery(conversions[attr], 'enrollments',        'hpa')      }</td>
-                    <td>{ self.anthemQuery(conversions[attr], 'enrollments',        'ma')       }</td>
-                    <td>{ self.anthemQuery(conversions[attr], 'enrollments',        'pdp')      }</td>
-                    <td>{ self.anthemQuery(conversions[attr], 'enrollments',        'ae')       }</td>
-                    <td>{ self.anthemQuery(conversions[attr], 'enrollments',        'ms')       }</td>
-                    <td>{ self.anthemQuery(conversions[attr], 'enrollments',        'ms non-gi')}</td>
-                    <td>{ self.anthemQuery(conversions[attr], 'enrollments',        'dsnp')     }</td>
-                    <td>{ self.anthemQuery(conversions[attr], 'conversionRate',     'PDP')      }</td>
+                        { self.anthemQuery(conv, 'totalCalls',         'MA')       }</td>
+                    <td>{ self.anthemQuery(conv, 'opportunities',      'MA')       }</td>
+                    <td>{ self.anthemQuery(conv, 'totalEnrollments')               }</td>
+                    <td>{ self.anthemQuery(conv, 'enrollments',        't2')       }</td>
+                    <td>{ self.anthemQuery(conv, 'enrollments',        'hpa')      }</td>
+                    <td>{ self.anthemQuery(conv, 'enrollments',        'ma')       }</td>
+                    <td>{ self.anthemQuery(conv, 'enrollments',        'pdp')      }</td>
+                    <td>{ self.anthemQuery(conv, 'enrollments',        'ae')       }</td>
+                    <td>{ self.anthemQuery(conv, 'enrollments',        'ms')       }</td>
+                    <td>{ self.anthemQuery(conv, 'enrollments',        'ms non-gi')}</td>
+                    <td>{ self.anthemQuery(conv, 'enrollments',        'dsnp')     }</td>
+                    <td>{ self.anthemQuery(conv, 'conversionRate',     'PDP')      }</td>
                 </tr>
             );
         }
@@ -235,6 +256,52 @@ class Stats extends Component {
                             self.state[goalEntity][sessionStorage.getItem('client')][product][sessionStorage.getItem('site')] * 100).toFixed(2) }%
                     </span>
                 </div>
+            );
+        }
+
+        function tableHeaders(client){
+            const HEADERS = {
+                "Aetna": [
+                    { className: '', title: 'Total MA Calls', content: 'Calls'},
+                    { className: '', title: 'MA New Enrollments of prospects', content: 'NE'},
+                    { className: '', title: 'MA Plan Change for current members', content: 'PC'},
+                    { className: '', title: 'Home Visits', content: 'HV'},
+                    { className: '', title: 'Licensed Agent Callback', content: 'LACB'},
+                    { className: '', title: 'Raw Conversion Rate - all prospect enrollments and leads divided by total prospect calls', content: 'Raw Conv %'},
+                    { className: 'MAR', title: 'Conversion Rate - only new enrollments over prospect calls', content: 'Conv %'},
+                    { className: '', title: 'Total PDP Calls', content: 'Calls'},
+                    { className: '', title: 'PDP New Enrollments of prospects', content: 'NE'},
+                    { className: '', title: 'PDP Plan Change for current members', content: 'PC'},
+                    { className: '', title: 'Conversion Rate - only prospect enrollments over prospect calls', content: 'Conv %'}
+                ],
+                "Caresource": [
+                    { className: '', title: 'Total Calls', content: 'Calls'},
+                    { className: '', title: 'New Enrollments of prospects', content: 'New Enrollments'},
+                    { className: '', title: 'Home Visits', content: 'Home Visits'},
+                    { className: '', title: 'Licensed Agent Callback', content: 'LACB'},
+                    { className: '', title: 'Conversion Rate - only new enrollments over prospect calls', content: 'Conversion Rate'}
+                ],
+                "Anthem": [
+                    { className: '', title: 'Total Calls', content: 'Calls'},
+                    { className: '', title: 'Calls with opportunity of conversion', content: 'Opportunities'},
+                    { className: '', title: 'Enrollments across all product types', content: 'Total Enrollments'},
+                    { className: '', title: 'T2 - Quote ID Given', content: 'T2'},
+                    { className: '', title: 'HPA - Quote ID Given', content: 'HPA'},
+                    { className: '', title: 'MAPD Enrollments', content: 'MAPD'},
+                    { className: '', title: 'PDP Enrollments', content: 'PDP'},
+                    { className: '', title: 'AE Enrollments', content: 'AE'},
+                    { className: '', title: 'MS Enrollments', content: 'MS'},
+                    { className: '', title: 'MS Non-GI Enrollments', content: 'MS Non-GI'},
+                    { className: '', title: 'DSNP Enrollments', content: 'DSNP'},
+                    { className: '', title: 'Conversion Rate - only enrollments over total opportunities', content: 'Conv %'}
+                ]
+            };
+
+            if (HEADERS[client] === undefined) return;
+            return (
+                <tr>
+                    { HEADERS[client].map( el => <th className={el.className} title={el.title} key={el.title}>{el.content}</th> ) }
+                </tr>
             );
         }
 
@@ -279,30 +346,17 @@ class Stats extends Component {
                         </div>
                         <Table>
                             <thead>
-                            <tr>
-                                <td></td>
-                                <td colSpan="7">MA</td>
-                                <td colSpan="5">PDP</td>
-                            </tr>
-                            <tr>
-                                <th></th>
-                                <th className="MAL" title="Total MA Calls">Calls</th>
-                                <th title="New Enrollments of prospects">NE</th>
-                                <th title="Plan Change for current members">PC</th>
-                                <th title="Home Visits">HV</th>
-                                <th title="Licensed Agent Callback">LACB</th>
-                                <th title="Raw Conversion Rate - all prospect enrollments and leads divided by total prospect calls">Raw Conv %</th>
-                                <th className="MAR" title="Conversion Rate - only new enrollments over prospect calls">Conv %</th>
-                                <th title="Total PDP Calls">Calls</th>
-                                <th title="New Enrollments of prospects">NE</th>
-                                <th title="Plan Change for current members">PC</th>
-                                <th title="Conversion Rate - only prospect enrollments over prospect calls">Conv %</th>
-                            </tr>
+                                <tr>
+                                    <td></td>
+                                    <td colSpan="7">MA</td>
+                                    <td colSpan="5">PDP</td>
+                                </tr>
+                                { tableHeaders('Aetna') }
                             </thead>
                             <tbody>
-                            { stats('Today') }
-                            { stats('Yesterday') }
-                            { stats('AEP To Date') }
+                            { stats(conversions['Today'], 'Today', sessionStorage.getItem('client')) }
+                            { stats(conversions['Yesterday'], 'Yesterday', sessionStorage.getItem('client')) }
+                            { stats(conversions['AEP To Date'], 'AEP To Date', sessionStorage.getItem('client')) }
                             </tbody>
                         </Table>
                     </div>
@@ -325,19 +379,12 @@ class Stats extends Component {
                         </div>
                         <Table>
                             <thead>
-                            <tr>
-                                <th></th>
-                                <th className="MAL" title="Total Calls">Calls</th>
-                                <th title="New Enrollments of prospects">New Enrollments</th>
-                                <th title="Home Visits">Home Visits</th>
-                                <th title="Licensed Agent Callback">LACB</th>
-                                <th className="MAR" title="Conversion Rate - only new enrollments over prospect calls">Conversion Rate</th>
-                            </tr>
+                                { tableHeaders('Caresource') }
                             </thead>
                             <tbody>
-                            { stats('Today') }
-                            { stats('Yesterday') }
-                            { stats('AEP To Date') }
+                            { stats(conversions['Today'], 'Today', sessionStorage.getItem('client')) }
+                            { stats(conversions['Yesterday'], 'Yesterday', sessionStorage.getItem('client')) }
+                            { stats(conversions['AEP To Date'], 'AEP To Date', sessionStorage.getItem('client')) }
                             </tbody>
                         </Table>
                     </div>
@@ -354,13 +401,7 @@ class Stats extends Component {
                                     <div>AEP Entries</div>
                                 </div>
                                 <div className="col-4 entryCount">{
-                                    Math.floor( self.anthemQuery(conversions['AEP To Date'], 'enrollments', 't2')  / 10) +
-                                    Math.floor( self.anthemQuery(conversions['AEP To Date'], 'enrollments', 'hpa') / 5) +
-                                    Math.floor( (
-                                        self.anthemQuery(conversions['AEP To Date'], 'totalEnrollments') -
-                                        self.anthemQuery(conversions['AEP To Date'], 'enrollments', 't2') -
-                                        self.anthemQuery(conversions['AEP To Date'], 'enrollments', 'hpa')
-                                    ) / 2)
+                                    self.props.getEntries()
                                 }
                                 </div>
                             </div>
@@ -380,32 +421,18 @@ class Stats extends Component {
                         </div>
                         <Table>
                             <thead>
-                            <tr>
-                                <th></th>
-                                <th className="MAL" title="Total Calls">Calls</th>
-                                <th title="Calls with opportunity of conversion">Opportunities</th>
-                                <th title="Enrollments across all product types">Total Enrollments</th>
-                                <th title="T2 - Quote ID Given">T2</th>
-                                <th title="HPA - Quote ID Given">HPA</th>
-                                <th title="MAPD Enrollments">MAPD</th>
-                                <th title="PDP Enrollments">PDP</th>
-                                <th title="AE Enrollments">AE</th>
-                                <th title="MS Enrollments">MS</th>
-                                <th title="MS Non-GI Enrollments">MS Non-GI</th>
-                                <th title="DSNP Enrollments">DSNP</th>
-                                <th className="MAR" title="Conversion Rate - only enrollments over total opportunities">Conv %</th>
-                            </tr>
+                                { tableHeaders('Anthem') }
                             </thead>
                             <tbody>
-                            { stats('Today') }
-                            { stats('Yesterday') }
+                            { stats(conversions['Today'], 'Today', sessionStorage.getItem('client')) }
+                            { stats(conversions['Yesterday'], 'Yesterday', sessionStorage.getItem('client')) }
                             { weeklyStats() }
-                            { stats('AEP To Date') }
+                            { stats(conversions['AEP To Date'], 'AEP To Date', sessionStorage.getItem('client')) }
                             </tbody>
                         </Table>
                         {
                             //If licensed Agent -- display disclaimer
-                            (sessionStorage.getItem('licensed') == 1) ? (
+                            (sessionStorage.getItem('licensed') === 1) ? (
                                 <b>Disclaimer: These numbers should not be used to determine licensed incentives - these are just quotes.</b>
                             ) : ('')
                         }
@@ -414,9 +441,95 @@ class Stats extends Component {
             }
         }
 
+        function adminGrabStats(){
+            fetch(`/api/siteEnrollments/${self.state.adminClient}/${self.state.adminSite}/${self.state.adminStartDate}/${(self.state.adminStartDate) ? self.state.adminEndDate : '' }`)
+                .then( res => res.json() )
+                .then( stats => self.setState({adminStats: stats}) )
+                .catch( err => console.log(err) );
+        }
+
+        function adminStats(){
+            if (self.state.adminStats === []) return;
+            //let jsx = self.state.adminStats.map( el => stats(el, name, client));
+
+            return '';
+        }
+
+        function adminTable(){
+            return (
+                <div>
+                    <Table>
+                        <thead>
+                            { tableHeaders(self.state.adminClient) }
+                        </thead>
+                        <tbody>
+                        { adminStats() }
+                        </tbody>
+                    </Table>
+                </div>
+            );
+        }
+
+        function admin(){
+            return (
+                <div>
+                    <Form>
+                        <Row>
+                            <Col md={3}>
+                                <FormGroup>
+                                    <Label for="sSite">Site</Label>
+                                    <Input type="select" name="site" id="sSite" onChange={ (e) => self.setState({adminSite: e.target.value}) }>
+                                        <option value=""></option>
+                                        <option value="Provo">PRV</option>
+                                        <option value="San Antonio">SAT</option>
+                                        <option value="Memphis">MEM</option>
+                                        <option value="Salt Lake City">SLC</option>
+                                        <option value="Sawgrass">SAW</option>
+                                        <option value="Roy">ROY</option>
+                                    </Input>
+                                </FormGroup>
+                            </Col>
+                            <Col md={3}>
+                                <FormGroup>
+                                    <Label for="sClient">Client</Label>
+                                    <Input type="select" name="client" id="sClient" onChange={ (e) => self.setState({adminClient: e.target.value}) }>
+                                        <option value=""></option>
+                                        <option value="Aetna">Aetna</option>
+                                        <option value="Caresource">CareSource</option>
+                                        <option value="Anthem">Anthem</option>
+                                    </Input>
+                                </FormGroup>
+                            </Col>
+                            <Col md={2}>
+                                <FormGroup>
+                                    <Label for="startDate">Start Date</Label>
+                                    <Input type="date" name="startDate" id="startDate" min="2018-10-01" max="2019-01-31"
+                                           placeholder="Start Date" onChange={ (e) => self.setState({adminStartDate: e.target.value}) } />
+                                </FormGroup>
+                            </Col>
+                            <Col md={2}>
+                                <FormGroup>
+                                    <Label for="endDate">End Date</Label>
+                                    <Input type="date" name="endDate" id="endDate"  min="2018-10-01" max="2019-01-31"
+                                           placeholder="End Date" onChange={ (e) => self.setState({adminEndDate: e.target.value}) } />
+                                </FormGroup>
+                            </Col>
+                            <Col md={2}>
+                                <FormGroup>
+                                    <Button id="bGenerate" style={{marginTop: 32 + 'px'}} onClick={adminGrabStats}>Generate</Button>
+                                </FormGroup>
+                            </Col>
+                        </Row>
+                    </Form>
+                    {/*{ (self.state.adminStats.length > 0) ? adminTable() : '' }*/}
+                    { adminTable() }
+                </div>
+            );
+        }
+
         return (
             <div>
-                { table() }
+                { (sessionStorage.getItem('username') != null && sessionStorage.getItem('hash').toLowerCase() === 'nuicsdj89fhsd789fnsdui') ? admin() : table() }
             </div>
         );
     }

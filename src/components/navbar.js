@@ -75,45 +75,61 @@ export default class TopNavbar extends React.Component {
         const self = this;
         //TODO: add input validation
 
-        // TODO: commented to skip the ldap login, since my account doesn't have agent data...
-        // fetch('/api/login', {
-        //     method: 'POST',
-        //     body: JSON.stringify({username: this.state.username, password: this.state.password}),
-        //     headers: {
-        //         'accept': 'application/json',
-        //         'content-type': 'application/json'
-        //     }
-        // })
-        //     .then( function(res){
-        //         if ( res.status !== 201) {
-        //             self.triggerErrorMessage('Incorrect credentials');
-        //             throw new Error('Failed to log in');
-        //         }
-                fetch('/api/me', {
-                    method: 'POST',
-                    body: JSON.stringify({username: self.state.username}),
-                    headers: {
-                        'accept': 'application/json',
-                        'content-type': 'application/json'
-                    }
-                })
-                    .then( data => data.json() )
-                    .then( function(user) {
-                        //store user info
-                        sessionStorage.setItem('client', user.client);
-                        sessionStorage.setItem('userid', user.userid);
-                        sessionStorage.setItem('name', user.name);
-                        sessionStorage.setItem('site', user.site);
-                        sessionStorage.setItem('username', user.username);
-                        sessionStorage.setItem('licensed', user.licensed);
-                        sessionStorage.setItem('hash', user.hash);
-
-                        //fetch agent stats
-                        self.props.getStats();
-                        self.props.toggleLoggedIn(true);
+        fetch('/api/login', {
+            method: 'POST',
+            body: JSON.stringify({username: this.state.username, password: this.state.password}),
+            headers: {
+                'accept': 'application/json',
+                'content-type': 'application/json'
+            }
+        })
+            .then( function(res) {
+                if (res.status !== 201) {
+                    self.triggerErrorMessage('Incorrect credentials');
+                    throw new Error('Failed to log in');
+                }
+                return res.json();
+            })
+            .then( function(data){
+                if (data.username.toLowerCase() === 'admin' && data.hash === 'nuicsdj89fhsd789fnsdui') {
+                    sessionStorage.setItem('username', data.username);
+                    sessionStorage.setItem('hash', data.hash);
+                    self.props.toggleLoggedIn(true);
+                }
+                else {
+                    fetch('/api/me', {
+                        method: 'POST',
+                        body: JSON.stringify({username: self.state.username}),
+                        headers: {
+                            'accept': 'application/json',
+                            'content-type': 'application/json'
+                        }
                     })
-            // })
-            // .catch( err => console.log(err) )
+                        .then( function(res){
+                            if ( res.status === 201) return res.json();
+                            else {
+                                self.triggerErrorMessage('Agent account not found.');
+                                throw new Error('Agent account not found.');
+                            }
+                        })
+                        .then( function(user) {
+                            //store user info
+                            sessionStorage.setItem('client', user.client);
+                            sessionStorage.setItem('userid', user.userid);
+                            sessionStorage.setItem('name', user.name);
+                            sessionStorage.setItem('site', user.site);
+                            sessionStorage.setItem('username', user.username);
+                            sessionStorage.setItem('licensed', user.licensed);
+                            sessionStorage.setItem('hash', user.hash);
+
+                            //fetch agent stats
+                            self.props.getStats();
+                            self.props.toggleLoggedIn(true);
+                        })
+                        .catch( err => console.log(err) );
+                }
+            })
+            .catch( err => console.log(err) )
     }
     logout() {
         this.props.toggleLoggedIn(false);
@@ -121,7 +137,7 @@ export default class TopNavbar extends React.Component {
     incentiveModal() {
         const client = sessionStorage.getItem('client');
         const site = sessionStorage.getItem('site');
-        if (client !== 'Aetna') return ;
+        if (client !== 'Aetna') return;
 
         return (
             <div>

@@ -4,16 +4,11 @@ Front End
     -
 - navbar.js
     - Add input validation to the login form
+        - sanitize input
 - stats.js
-    - All
-        - Make Elevate width match screen size if it's being cropped.
-    - Aetna
-        - Spreadsheet with all agents’ stats reported near the end of AEP
-    - CareSource
-        - Spreadsheet with all agents’ stats reported near the end of AEP
-    - Anthem
-        - Power hour double entries is happening.
-        	- 8am, 10am, 12pm, 2pm, 4pm: 1hr per power hour.
+    - (All) make stats download page.
+    - (Anthem) Make call_termination_id IN (171, 222, 271, 362, 375, 376, 400, 415, 434) count as enrollments for Lic. Agents
+
 
 
 /*********************/
