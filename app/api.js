@@ -81,7 +81,6 @@ router.route('/me').post(function(req, res){
     get(query)
         .then( function(data){
             let user = data[0];
-            console.log(user)
             user.site = user.client.substr(user.client.indexOf(' ') + 1);
             user.client = user.client.substr(0, user.client.indexOf(' '));
             user.hash = veryBasicEncryption(user.userid);
@@ -106,12 +105,24 @@ router.route('/stats/:client/:id').get(function(req, res){
         return;
     }
 
+
+    function startOfWeek() {
+        const date = new Date();
+        const diff = date.getDate() - date.getDay();
+        const firstDay = new Date(date.setDate(diff));
+        return firstDay.getFullYear() + '-' + (firstDay.getMonth() + 1) + '-' + firstDay.getDate();
+    }
+
     //Make queries into promises to resolve them all as one
     const yesterdayPromise = get(`SELECT ${table.returnFields.map( val => val.field + ' AS ' + val.as).join(', ')} FROM ${table.table} WHERE employee_id="${id}" AND ${table.date} > "${yesterday}" AND ${table.date} < curdate();`, 'Yesterday');
     const aepToDatePromise = get(`SELECT ${table.returnFields.map( val => val.field + ' AS ' + val.as).join(', ')} FROM ${table.table} WHERE employee_id="${id}" AND ${table.date} > "${aepStartDate}";`, 'AEP To Date');
     const TodayPromise = get(`SELECT ${table.returnFields.map( val => val.field + ' AS ' + val.as, '').join(', ')} FROM ${table.table} WHERE employee_id="${id}" AND ${table.date} > curdate();`, 'Today');
+    let weeklyPromise = get(`SELECT ${table.returnFields.map( val => val.field + ' AS ' + val.as).join(', ')} FROM ${table.table} WHERE employee_id="${id}" AND ${table.date} > "${startOfWeek()}" AND ${table.date} < curdate();`, 'This Week');
 
-    Promise.all([TodayPromise, yesterdayPromise, aepToDatePromise])
+    let promises = [TodayPromise, yesterdayPromise, aepToDatePromise];
+    if (client === 'anthem') promises.push(weeklyPromise);
+
+    Promise.all(promises)
         .then( data => {
             //Convert data array to an associative array
             let conversions = {};
@@ -158,18 +169,22 @@ router.route('/report/:client/:site/:startDate/:endDate?').get(function(req, res
     const site = req.params.site.toLowerCase().replace('%20', ' ');
     const startDate = req.params.startDate;
     const endDate = req.params.endDate ? req.params.endDate : null;
+    const username = req.headers['username'];
     const table = TABLES[client];
 
     const query = `
-    SELECT stag.familyName AS lastName, stag.givenName AS firstName, stag.username, nice.callpro_userid AS userid, ${table.returnFields.map(val => val.field + ' AS ' + val.as).join(', ')} 
+    SELECT stag.familyName AS lastName, stag.givenName AS firstName, nice.callpro_userid AS userid, ${table.returnFields.map(val => val.field + ' AS ' + val.as).join(', ')} 
     FROM iex_data.stag_adp_employeeinfo AS stag, iex_data.nice_agentroster_table AS nice, ${ table.table } AS conv
     WHERE stag.positionID = nice.adp_id
         AND nice.callpro_userid = conv.employee_id
         AND stag.positionStatusCode != 'T'
         AND stag.homeWorkLocationCity = "${ site }"
         AND conv.${table.date} > "${ startDate }"
-        ${ endDate !== null ? 'AND conv.' + table.date + ' <= "' + endDate + '"' : '' };
+        ${ endDate !== null ? 'AND conv.' + table.date + ' <= "' + endDate + '"' : '' }
+        ${ username !== undefined ? 'AND stag.username = "' + username + '"' : '' };
     `;
+
+    console.log(query)
 
     db.con.query(query, function(err, rows){
         if (err) console.log(err);

@@ -10,31 +10,18 @@ class App extends Component {
         this.toggleLoggedIn = this.toggleLoggedIn.bind(this);
         this.getLoggedIn = this.getLoggedIn.bind(this);
         this.getStats = this.getStats.bind(this);
-        this.getEntries = this.getEntries.bind(this);
-        this.getWeekly = this.getWeekly.bind(this);
+        this.countEntries = this.countEntries.bind(this);
         this.getTotalSiteEnrollments = this.getTotalSiteEnrollments.bind(this);
         this.state = {
             loggedIn: (sessionStorage.getItem('hash')) ? true : false,
             stats: {},
-            t2Entries: 0,
-            hpaEntries: 0,
-            restEntries: 0,
-            weekly: {},
             totalSiteEnrollments: {}
         };
         this.baseState = {
             loggedIn: false,
             stats: {},
-            t2Entries: 0,
-            hpaEntries: 0,
-            restEntries: 0,
-            weekly: {},
             totalSiteEnrollments: {}
         };
-    }
-
-    getEntries(){
-        return Math.floor(this.state.t2Entries/10) + Math.floor(this.state.hpaEntries/5) + Math.floor(this.state.restEntries/2);
     }
 
     isPowerHour(hour){
@@ -48,6 +35,7 @@ class App extends Component {
     }
 
     countEntries(stats){
+        if (stats === undefined) return 0;
         const self = this;
         const anthemProducts = [/ma/i, /ms/i, /pdp/i, /ae/i, /dsnp/i, /hpa/i, /t2/i];
         let hpaEntries = 0;
@@ -70,11 +58,9 @@ class App extends Component {
                 else if (i === 6) t2Entries += addedEntries;
                 return acc + addedEntries;
             }, 0
-        );
+        ) - t2Entries - hpaEntries;
 
-        self.setState({restEntries: restEntries - hpaEntries - t2Entries});
-        self.setState({hpaEntries: hpaEntries});
-        self.setState({t2Entries: t2Entries});
+        return Math.floor(t2Entries/10) + Math.floor(hpaEntries/5) + Math.floor(restEntries/2);
     }
 
     getLoggedIn(){
@@ -105,43 +91,12 @@ class App extends Component {
                 .then(data => data.json())
                 .then(function (stats) {
                     self.setState({stats: stats});
-                    self.countEntries(stats['AEP To Date']);
                     return stats;
                 })
                 .catch(err => {
                     console.log(err);
                     self.toggleLoggedIn(false);
                 });
-        }
-    }
-
-    getWeekly(){
-        function startOfWeek()
-        {
-            const date = new Date();
-            const diff = date.getDate() - date.getDay();
-            const firstDay = new Date(date.setDate(diff));
-            return firstDay.getFullYear() + '-' + (firstDay.getMonth() + 1) + '-' + firstDay.getDate();
-        }
-
-        if (Object.keys(this.state.weekly).length) return this.state.weekly;
-        else if (sessionStorage.getItem('hash')){
-            const self = this;
-            return fetch(`/api/report/${sessionStorage.getItem('client')}/${sessionStorage.getItem('site')}/${startOfWeek()}`, {
-                method: 'GET',
-                headers: {
-                    'accept': 'application/json',
-                    'content-type': 'application/json',
-                    'x-authentication': sessionStorage.getItem('hash'),
-                    'username': sessionStorage.getItem('username')
-                }
-            })
-                .then( data => data.json() )
-                .then( function(weekly){
-                    if (Object.keys(weekly).length !== 0) self.setState({weekly: weekly});
-                    return weekly;
-                })
-                .catch( err => console.log(err) );
         }
     }
 
@@ -166,14 +121,13 @@ class App extends Component {
         else if (sessionStorage.getItem('hash') !== null) {
             this.setState({ loggedIn: true});
             this.getStats();
-            if (sessionStorage.getItem('client').toLowerCase() === 'anthem') this.getWeekly();  //Get weekly stats for Anthem
         }
     }
     render() {
         return (
             <div>
                 <TopNavbar getLoggedIn={ this.getLoggedIn } toggleLoggedIn={ this.toggleLoggedIn } getStats={ this.getStats }/>
-                <Stats getLoggedIn={ this.getLoggedIn} getStats={ this.getStats } getWeekly={ this.getWeekly } getTotalSiteEnrollments={this.getTotalSiteEnrollments} getEntries={this.getEntries} />
+                <Stats getLoggedIn={ this.getLoggedIn} getStats={ this.getStats }  getTotalSiteEnrollments={this.getTotalSiteEnrollments} countEntries={this.countEntries} />
             </div>
         );
     }

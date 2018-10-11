@@ -164,15 +164,6 @@ class Stats extends Component {
     render() {
         const self = this;
         let conversions = this.props.getStats();
-        let weekly = (sessionStorage.getItem('client') === 'Anthem') ? this.props.getWeekly() : null;
-        const weeklyDrawings = function () {
-                const product = Math.floor((Number(weekly.t2) / 10) +
-                    Math.floor(Number(weekly.hpa) / 5) +
-                    Math.floor(
-                        Number( weekly.totalEnrollments) - Number(weekly.t2) - Number(weekly.hpa)
-                    ) / 2);
-                return (isNaN(product)) ? 0 : product;
-            };
 
         function stats(conv, name, client) {
             const aetnaEntries = function(){
@@ -181,7 +172,7 @@ class Stats extends Component {
             };
             const anthemEntries = function(){
                 if ( !['Yesterday', 'Today', 'AEP To Date', 'This Week'].includes(name) )
-                    return <td>{ adminAnthemEntries(conv) }</td>;
+                    return <td>{ self.props.countEntries(conv) }</td>;
             };
 
             if (client === 'Aetna') return (
@@ -235,26 +226,6 @@ class Stats extends Component {
                     { anthemEntries() }
                 </tr>
             );
-        }
-
-        function weeklyStats() {
-            return (
-                <tr>
-                    <th scope="row">This Week</th>
-                    <td className="MAL">{ weekly.calls | 0          }</td>
-                    <td>{ weekly.opportunities | 0                  }</td>
-                    <td>{ weekly.totalEnrollments | 0               }</td>
-                    <td>{ weekly.t2 | 0                             }</td>
-                    <td>{ weekly.hpa | 0                            }</td>
-                    <td>{ weekly.mapd | 0                           }</td>
-                    <td>{ weekly.pdp | 0                            }</td>
-                    <td>{ weekly.ae | 0                             }</td>
-                    <td>{ weekly.ms | 0                             }</td>
-                    <td>{ weekly['ms non-gi'] | 0                   }</td>
-                    <td>{ weekly.dsnp | 0                           }</td>
-                    <td>{ Number(weekly.convRate).toFixed(2) | 0    }</td>
-                </tr>
-            )
         }
 
         function goalsElement(id, title, class_name, product, goalEntity, progress){
@@ -319,8 +290,10 @@ class Stats extends Component {
             if (HEADERS[client] === undefined) return;
 
             const entriesGP = function() {
-                if (self.state.adminClient.toLowerCase() === 'aetna') return <th className="entriesGP" title="Grand Prize Entries"> GP Entries </th>;
-                if (self.state.adminClient.toLowerCase() === 'anthem') return <th className="entriesGP" title="Grand Prize Entries"> GP Entries </th>;
+                if (self.state.adminClient.toLowerCase() === 'aetna' && sessionStorage.getItem('username').toLowerCase() === 'admin')
+                    return <th className="entriesGP" title="Grand Prize Entries"> GP Entries </th>;
+                if (self.state.adminClient.toLowerCase() === 'anthem' && sessionStorage.getItem('username').toLowerCase() === 'admin')
+                    return <th className="entriesGP" title="Grand Prize Entries"> GP Entries </th>;
             };
 
             return (
@@ -427,7 +400,7 @@ class Stats extends Component {
                                     <div>AEP Entries</div>
                                 </div>
                                 <div className="col-4 entryCount">{
-                                    self.props.getEntries()
+                                    self.props.countEntries(conversions['AEP To Date'])
                                 }
                                 </div>
                             </div>
@@ -439,7 +412,7 @@ class Stats extends Component {
                                             <div>Grand Prize</div>
                                             <div>Week Entries</div>
                                         </div>
-                                        <div className="col-4 entryCount">{ weeklyDrawings() }
+                                        <div className="col-4 entryCount">{/* weeklyDrawings() */}
                                         </div>
                                     </div>
                                 ) : ('')
@@ -452,58 +425,19 @@ class Stats extends Component {
                             <tbody>
                             { stats(conversions['Today'], 'Today', sessionStorage.getItem('client')) }
                             { stats(conversions['Yesterday'], 'Yesterday', sessionStorage.getItem('client')) }
-                            { weeklyStats() }
+                            { stats(conversions['This Week'], 'This Week', sessionStorage.getItem('client')) }
                             { stats(conversions['AEP To Date'], 'AEP To Date', sessionStorage.getItem('client')) }
                             </tbody>
                         </Table>
                         {
                             //If licensed Agent -- display disclaimer
-                            (sessionStorage.getItem('licensed') === 1) ? (
+                            (sessionStorage.getItem('licensed') === '1') ? (
                                 <b>Disclaimer: These numbers should not be used to determine licensed incentives - these are just quotes.</b>
                             ) : ('')
                         }
                     </div>
                 );
             }
-        }
-
-        function isPowerHour(hour){
-            //Takes only the hour
-            return Number( [8, 10, 12, 14, 16].includes(Number(hour)) );
-        }
-
-        function adminAnthemEntries(stats){
-            anthemEntries(stats);
-            return Math.floor(sessionStorage.getItem('t2Entries')/10) + Math.floor(sessionStorage.getItem('hpaEntries')/5) + Math.floor(sessionStorage.getItem('restEntries')/2);
-        }
-
-        function anthemEntries(stats){
-            const anthemProducts = [/ma/i, /ms/i, /pdp/i, /ae/i, /dsnp/i, /hpa/i, /t2/i];
-            let hpaEntries = 0;
-            let t2Entries = 0;
-            let restEntries = stats.reduce(
-                (acc, call) => {
-                    if (call.product === null) return acc;
-                    if (self.licensedVsUnlicensedCriteria(call) === 0) return acc;
-                    let isEligiableProduct = false;
-                    let i = 0;
-                    for (; i < anthemProducts.length; i++){
-                        if ( call.product.match(anthemProducts[i]) ) {
-                            isEligiableProduct = true;
-                            break;
-                        }
-                    }
-
-                    const addedEntries = (isEligiableProduct) ? 1 + isPowerHour( (new Date(call.datetime)).getHours() ) : 0;
-                    if (i === 5) hpaEntries += addedEntries;
-                    else if (i === 6) t2Entries += addedEntries;
-                    return acc + addedEntries;
-                }, 0
-            );
-
-            sessionStorage.setItem('restEntries', String(restEntries - hpaEntries - t2Entries));
-            sessionStorage.setItem('hpaEntries', String(hpaEntries));
-            sessionStorage.setItem('t2Entries', String(t2Entries));
         }
 
         function adminGrabStats(){
@@ -611,8 +545,7 @@ class Stats extends Component {
                             <Col md={2}>
                                 <FormGroup>
                                     <Label for="startDate">Start Date</Label>
-                                    <Input type="date" name="startDate" id="startDate" min="2018-10-01" max="2019-01-31" value="2018-10-01"
-                                           placeholder="Start Date" />
+                                    <Input type="date" name="startDate" id="startDate" min="2018-10-01" max="2019-01-31" defaultValue="2018-10-01" placeholder="Start Date" />
                                 </FormGroup>
                             </Col>
                             <Col md={2}>
