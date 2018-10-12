@@ -1,11 +1,14 @@
 import React, {Component} from 'react';
 import { Table } from 'reactstrap';
+import Papa from 'papaparse';
 import { Col, Row, Button, Form, FormGroup, Label, Input } from 'reactstrap';   // For admin table generation
 
 class Stats extends Component {
     constructor(props) {
         super(props);
+        this.turnCallsIntoStats = this.turnCallsIntoStats.bind(this);
         this.state = {
+            adminStatsJSON: [],
             adminStats: [],
             adminSite: '',
             adminClient: '',
@@ -166,6 +169,106 @@ class Stats extends Component {
             );
         if (result === null || isNaN(result) || result === undefined) return 0;
         return result;
+    }
+
+    turnCallsIntoStats(){
+        //Runs after render(), when user downloads stats
+        if (this.state.adminStats.length === 0) return;
+
+        // First, group all calls by agents: {'agent_id1': [...calls], 'agent_id2': [...calls], ... }
+        let agentStats = {};
+        const self = this;
+        this.state.adminStats.forEach( function(el) {
+            if ( !agentStats.hasOwnProperty(el.userid) ) agentStats[el.userid] = {fName: el.firstName, lName: el.lastName, calls: []};
+            let deepCopy = {};
+            Object.assign(deepCopy, el);
+            delete deepCopy.fName;
+            delete deepCopy.lName;
+            agentStats[el.userid].calls.push(deepCopy);
+        });
+
+        // Sort by lastName in ascending order
+        const sorting = function(a, b){
+            if(agentStats[a].lName < agentStats[b].lName) return -1;
+            if(agentStats[a].lName > agentStats[b].lName) return 1;
+
+            if(agentStats[a].fName < agentStats[b].fName) return -1;
+            if(agentStats[a].fName > agentStats[b].fName) return 1;
+            return 0;
+        };
+
+        // populate JSON data
+        let json = [];
+        Object.keys(agentStats).sort(sorting).forEach( function(el){
+            let jsonStats = {};
+            console.log(self.state.adminClient)
+            if (self.state.adminClient === "Aetna"){
+                jsonStats = {
+                    fName: agentStats[el].fName,
+                    lName: agentStats[el].lName,
+                    MACalls: self.aetnaCaresourceQuery(agentStats[el].calls, 'totalCalls', 'MA'),
+                    MANE: self.aetnaCaresourceQuery(agentStats[el].calls, 'enrollments', 'MA', 'P'),
+                    MAPC: self.aetnaCaresourceQuery(agentStats[el].calls, 'enrollments', 'MA', 'M'),
+                    HV: self.aetnaCaresourceQuery(agentStats[el].calls, 'homeVisits'),
+                    LACB: self.aetnaCaresourceQuery(agentStats[el].calls, 'lacb'),
+                    MARawConvRate: self.aetnaCaresourceQuery(agentStats[el].calls, 'rawConversionRate', 'MA'),
+                    MAConvRate: self.aetnaCaresourceQuery(agentStats[el].calls, 'conversionRate', 'MA'),
+                    PDPCalls: self.aetnaCaresourceQuery(agentStats[el].calls, 'totalCalls', 'PDP'),
+                    PDPNE: self.aetnaCaresourceQuery(agentStats[el].calls, 'enrollments', 'PDP', 'P'),
+                    PDPPC: self.aetnaCaresourceQuery(agentStats[el].calls, 'enrollments', 'PDP', 'M'),
+                    PDPConvRate: self.aetnaCaresourceQuery(agentStats[el].calls, 'conversionRate', 'PDP'),
+                    entries: self.aetnaCaresourceQuery(agentStats[el].calls, 'entries')
+                };
+            }
+            else if (self.state.adminClient === "Caresource"){
+                jsonStats = {
+                    fName: agentStats[el].fName,
+                    lName: agentStats[el].lName,
+                    MACalls: self.aetnaCaresourceQuery(agentStats[el].calls, 'totalCalls', 'MA'),
+                    MANE: self.aetnaCaresourceQuery(agentStats[el].calls, 'enrollments', 'MA', 'P'),
+                    HV: self.aetnaCaresourceQuery(agentStats[el].calls, 'homeVisits'),
+                    LACB: self.aetnaCaresourceQuery(agentStats[el].calls, 'lacb'),
+                    MAConvRate: self.aetnaCaresourceQuery(agentStats[el].calls, 'conversionRate', 'MA')
+                };
+            }
+            else if (self.state.adminClient === "Anthem"){
+                jsonStats = {
+                    "First Name": agentStats[el].fName,
+                    "Last Name": agentStats[el].lName,
+                    "Total Calls": self.anthemQuery(agentStats[el].calls, 'totalCalls', 'MA'),
+                    "Opportunities": self.anthemQuery(agentStats[el].calls, 'opportunities', 'MA'),
+                    "Total Enrollments": self.anthemQuery(agentStats[el].calls, 'totalEnrollments'),
+                    "T2": self.anthemQuery(agentStats[el].calls, 'enrollments', 't2'),
+                    "HPA": self.anthemQuery(agentStats[el].calls, 'enrollments', 'hpa'),
+                    "MA": self.anthemQuery(agentStats[el].calls, 'enrollments', 'ma'),
+                    "PDP": self.anthemQuery(agentStats[el].calls, 'enrollments', 'pdp'),
+                    "AE": self.anthemQuery(agentStats[el].calls, 'enrollments', 'ae'),
+                    "MS": self.anthemQuery(agentStats[el].calls, 'enrollments', 'ms'),
+                    "MS Non-GI": self.anthemQuery(agentStats[el].calls, 'enrollments', 'ms non-gi'),
+                    "DSNP": self.anthemQuery(agentStats[el].calls, 'enrollments', 'dsnp'),
+                    "Conversion Rate": self.anthemQuery(agentStats[el].calls, 'conversionRate', 'PDP'),
+                    "Entries": self.props.countEntries(agentStats[el].calls)
+                };
+            }
+            else return;
+
+            json.push(jsonStats);
+        });
+        this.setState({adminStatsJSON: [...json]});
+
+        let csv = Papa.unparse(json);
+        const filename = `Stats ${this.state.adminClient} ${this.state.adminSite} ${this.state.adminStartDate}${this.state.adminEndDate !== "" ? ' through ' + this.state.adminEndDate : ''}.csv`;
+        if (csv == null) return;
+
+        // Converts CSV strings into a CSV file
+        if (!csv.match(/^data:text\/csv/i)) csv = 'data:text/csv;charset=utf-8,' + csv;
+        const data = encodeURI(csv);
+
+        // Triggers the download of the csv file
+        let link = document.createElement('a');
+        link.setAttribute('href', data);
+        link.setAttribute('download', filename);
+        link.click();
     }
 
     render() {
@@ -459,8 +562,8 @@ class Stats extends Component {
 
             self.setState({adminSite: site});
             self.setState({adminClient: client});
-            self.setState({adminStartDate: endDate});
-            self.setState({adminEndDate: startDate});
+            self.setState({adminStartDate: startDate});
+            self.setState({adminEndDate: endDate});
 
             // Grab data from DB
             fetch(`/api/report/${client}/${site}/${startDate}/${(endDate) ? endDate : '' }`)
@@ -524,7 +627,7 @@ class Stats extends Component {
                 <div>
                     <Form>
                         <Row>
-                            <Col md={3}>
+                            <Col md={2}>
                                 <FormGroup>
                                     <Label for="sSite">Site</Label>
                                     <Input type="select" name="site" id="sSite" >
@@ -538,7 +641,7 @@ class Stats extends Component {
                                     </Input>
                                 </FormGroup>
                             </Col>
-                            <Col md={3}>
+                            <Col md={2}>
                                 <FormGroup>
                                     <Label for="sClient">Client</Label>
                                     <Input type="select" name="client" id="sClient" >
@@ -562,9 +665,14 @@ class Stats extends Component {
                                            placeholder="End Date" />
                                 </FormGroup>
                             </Col>
-                            <Col md={2}>
+                            <Col md={1}>
                                 <FormGroup>
                                     <Button id="bGenerate" style={{marginTop: 32 + 'px'}} onClick={adminGrabStats}>Generate</Button>
+                                </FormGroup>
+                            </Col>
+                            <Col md={1}>
+                                <FormGroup>
+                                    <Button id="bExport" style={{marginTop: 32 + 'px'}} onClick={self.turnCallsIntoStats}>Export</Button>
                                 </FormGroup>
                             </Col>
                         </Row>
@@ -580,6 +688,7 @@ class Stats extends Component {
             </div>
         );
     }
+
 }
 
 export default Stats;

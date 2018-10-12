@@ -184,8 +184,6 @@ router.route('/report/:client/:site/:startDate/:endDate?').get(function(req, res
         ${ username !== undefined ? 'AND stag.username = "' + username + '"' : '' };
     `;
 
-    console.log(query)
-
     db.con.query(query, function(err, rows){
         if (err) console.log(err);
         res.status(201).send(rows);
