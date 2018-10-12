@@ -1,17 +1,14 @@
 /*********************/
 Front End
-- ALL
-    -
 - navbar.js
     - Add input validation to the login form
         - sanitize input
 - stats.js
-    - (Anthem) Make call_termination_id IN (171, 222, 271, 362, 375, 376, 400, 415, 434) count as enrollments for Lic. Agents
+    - (all) Add button on admin page to download stats.
 
 
 /*********************/
 Back End
-- figure out what to store in sessionStorage/localstorage to uniquely identify who is logged in.
 -
 
 
@@ -19,5 +16,3 @@ Back End
 Optional -- if time allows
 - README.md
     - make it more personal
-- Anthem
-    - During power hours -- change the page to make it abundantly clear that it's power hour!

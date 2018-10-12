@@ -99,8 +99,12 @@ class Stats extends Component {
     }
 
     licensedVsUnlicensedCriteria(obj){
-        if (Number(sessionStorage.getItem('licensed')) === 1) return obj.conversion;    //if licensed
-        return obj.enrollment;                                                          //if unlicensed
+        if (Number(sessionStorage.getItem('licensed')) === 1){ //if licensed
+            //Exhaustive list of qualifying disposition ID's
+            if ( [171, 222, 271, 362, 375, 376, 400, 415, 434].includes(obj.dispoID) ) return obj.conversion | obj.enrollment;
+            else return 0;
+        }
+        return obj.enrollment;                                  //if unlicensed
     }
 
     anthemQuery(stats, query, product){
@@ -116,7 +120,10 @@ class Stats extends Component {
             result = stats.reduce(
                 (acc, call) => {
                     if (call.product === null) return acc;
-                    return Number(call.opportunity && anthemProducts.reduce(
+                    if (call.opportunity === 0) return acc;
+
+                    if ( sessionStorage.getItem('licensed')) return acc + [171, 222, 271, 362, 375, 376, 400, 415, 434].includes(call.dispoID);
+                    else return Number(anthemProducts.reduce(
                         (bool, prod) => Number(call.product.toLowerCase().includes(prod)) | bool, 0)
                     ) + acc;
                 }, 0

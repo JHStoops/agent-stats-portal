@@ -17,7 +17,7 @@ const TABLES = {
   anthem: {
       table: "convl.anthem_conversion_summary",
       date: "interaction_datetime",
-      returnFields: [{field: "interaction_datetime", as: "datetime"}, {field: "campaign_name", as: "product"}, {field: "call_termination_type", as: "dispo"}, {field: "enrollment", as: "enrollment"}, {field: "conversion", as: "conversion"}, {field: "opportunity", as: "opportunity"}]
+      returnFields: [{field: "interaction_datetime", as: "datetime"}, {field: "campaign_name", as: "product"}, {field: "call_termination_type", as: "dispo"}, {field: "call_termination_id", as: "dispoID"}, {field: "enrollment", as: "enrollment"}, {field: "conversion", as: "conversion"}, {field: "opportunity", as: "opportunity"}]
   },
   agentRoster: { table: "iex_data.nice_agentroster_table" },
   agentStag: { table: "iex_data.stag_adp_employeeinfo" }
