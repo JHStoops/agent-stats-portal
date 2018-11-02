@@ -3,13 +3,19 @@ Front End
 - navbar.js
     - Add input validation to the login form
         - sanitize input
-- stats.js
-    - (all) Add button on admin page to download stats.
 
 
 /*********************/
 Back End
--
+-from old to new, make changes:
+ givenName -> first_name
+ familyName -> last_name
+ positionID -> position_id
+ jobValue -> job_title
+ positionStatusCode -> deleted
+ --- requires checking for 1 (active) or 0 (terminated)
+ homeWorkLocationCity -> agent_site
+ --- requires changing dropdown values in admin form, and not bringing values to lower case
 
 
 /*********************/

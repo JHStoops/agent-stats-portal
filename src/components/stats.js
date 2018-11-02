@@ -201,34 +201,33 @@ class Stats extends Component {
         let json = [];
         Object.keys(agentStats).sort(sorting).forEach( function(el){
             let jsonStats = {};
-            console.log(self.state.adminClient)
             if (self.state.adminClient === "Aetna"){
                 jsonStats = {
-                    fName: agentStats[el].fName,
-                    lName: agentStats[el].lName,
-                    MACalls: self.aetnaCaresourceQuery(agentStats[el].calls, 'totalCalls', 'MA'),
-                    MANE: self.aetnaCaresourceQuery(agentStats[el].calls, 'enrollments', 'MA', 'P'),
+                    "First Name": agentStats[el].fName,
+                    "Last Name": agentStats[el].lName,
+                    "MA Calls": self.aetnaCaresourceQuery(agentStats[el].calls, 'totalCalls', 'MA'),
+                    "MANE": self.aetnaCaresourceQuery(agentStats[el].calls, 'enrollments', 'MA', 'P'),
                     MAPC: self.aetnaCaresourceQuery(agentStats[el].calls, 'enrollments', 'MA', 'M'),
                     HV: self.aetnaCaresourceQuery(agentStats[el].calls, 'homeVisits'),
                     LACB: self.aetnaCaresourceQuery(agentStats[el].calls, 'lacb'),
-                    MARawConvRate: self.aetnaCaresourceQuery(agentStats[el].calls, 'rawConversionRate', 'MA'),
-                    MAConvRate: self.aetnaCaresourceQuery(agentStats[el].calls, 'conversionRate', 'MA'),
-                    PDPCalls: self.aetnaCaresourceQuery(agentStats[el].calls, 'totalCalls', 'PDP'),
+                    "MA Raw Conv %": self.aetnaCaresourceQuery(agentStats[el].calls, 'rawConversionRate', 'MA'),
+                    "MA Conv %": self.aetnaCaresourceQuery(agentStats[el].calls, 'conversionRate', 'MA'),
+                    "PDP Calls": self.aetnaCaresourceQuery(agentStats[el].calls, 'totalCalls', 'PDP'),
                     PDPNE: self.aetnaCaresourceQuery(agentStats[el].calls, 'enrollments', 'PDP', 'P'),
                     PDPPC: self.aetnaCaresourceQuery(agentStats[el].calls, 'enrollments', 'PDP', 'M'),
-                    PDPConvRate: self.aetnaCaresourceQuery(agentStats[el].calls, 'conversionRate', 'PDP'),
-                    entries: self.aetnaCaresourceQuery(agentStats[el].calls, 'entries')
+                    "PDP Conv %": self.aetnaCaresourceQuery(agentStats[el].calls, 'conversionRate', 'PDP'),
+                    Entries: self.aetnaCaresourceQuery(agentStats[el].calls, 'entries')
                 };
             }
             else if (self.state.adminClient === "Caresource"){
                 jsonStats = {
-                    fName: agentStats[el].fName,
-                    lName: agentStats[el].lName,
-                    MACalls: self.aetnaCaresourceQuery(agentStats[el].calls, 'totalCalls', 'MA'),
+                    "First Name": agentStats[el].fName,
+                    "Last Name": agentStats[el].lName,
+                    "Calls": self.aetnaCaresourceQuery(agentStats[el].calls, 'totalCalls', 'MA'),
                     MANE: self.aetnaCaresourceQuery(agentStats[el].calls, 'enrollments', 'MA', 'P'),
                     HV: self.aetnaCaresourceQuery(agentStats[el].calls, 'homeVisits'),
                     LACB: self.aetnaCaresourceQuery(agentStats[el].calls, 'lacb'),
-                    MAConvRate: self.aetnaCaresourceQuery(agentStats[el].calls, 'conversionRate', 'MA')
+                    "Conv %": self.aetnaCaresourceQuery(agentStats[el].calls, 'conversionRate', 'MA')
                 };
             }
             else if (self.state.adminClient === "Anthem"){

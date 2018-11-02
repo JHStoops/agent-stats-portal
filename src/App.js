@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
+import { BrowserRouter as Router, Route } from "react-router-dom";
 
 import TopNavbar from "./components/navbar";
 import Stats from "./components/stats";
+import TopAgents from "./components/topAgents";
 require('./css/index.css');
 
 class App extends Component {
@@ -125,10 +127,13 @@ class App extends Component {
     }
     render() {
         return (
-            <div>
-                <TopNavbar getLoggedIn={ this.getLoggedIn } toggleLoggedIn={ this.toggleLoggedIn } getStats={ this.getStats }/>
-                <Stats getLoggedIn={ this.getLoggedIn} getStats={ this.getStats }  getTotalSiteEnrollments={this.getTotalSiteEnrollments} countEntries={this.countEntries} />
-            </div>
+            <Router>
+                <div>
+                    <Route exact path="/" render={() => <TopNavbar getLoggedIn={ this.getLoggedIn }  toggleLoggedIn={ this.toggleLoggedIn } getStats={ this.getStats } /> } />
+                    <Route exact path="/" render={() => <Stats getLoggedIn={ this.getLoggedIn} getStats={ this.getStats }  getTotalSiteEnrollments={this.getTotalSiteEnrollments} countEntries={this.countEntries} /> } />
+                    <Route path="/PRV" component={TopAgents} />
+                </div>
+            </Router>
         );
     }
 }
