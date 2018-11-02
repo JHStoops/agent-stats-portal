@@ -7,7 +7,7 @@ class TopAgents extends Component {
         this.updateStats = this.updateStats.bind(this);
         this.state = {
             stats: [],
-            topAgentCategories: ['MANE', 'MAPC', 'PDPNE', 'PDPPC'],
+            topAgentCategories: ['LEADS', 'MANE', 'MAPC', 'PDPNE', 'PDPPC', 'RSVP'],
             counter: 0
         };
     }
@@ -28,10 +28,14 @@ class TopAgents extends Component {
     populateTable(){
         const key = this.getCategory();
         return this.state.stats
-            .sort( (a, b) => b[key] - a[key])
-            .slice(0, 5)
-            .filter( el => el[key] > 0)
-            .map( el => <tr key={el['First Name']+el['Last Name']}><td>{el['First Name']} {el['Last Name']}</td><td>{el[key]}</td></tr> )
+            .sort( (a, b) => (key === 'LEADS') ? (b.HV + b.LACB) - (a.HV + a.LACB) : b[key] - a[key])
+            .slice(0, 10)
+            .filter( el => (key === 'LEADS') ? el.HV + el.LACB > 0 : el[key] > 0)
+            .map( el =>
+                <tr key={el['First Name']+el['Last Name']}>
+                    <td>{el['First Name']} {el['Last Name']}</td>
+                    <td>{ (key === 'LEADS') ? el.HV + el.LACB : el[key]}</td>
+                </tr> );
     }
 
     sortStats(stats){
@@ -79,7 +83,8 @@ class TopAgents extends Component {
                     PDPNE: self.aetnaCaresourceQuery(agentStats[el].calls, 'enrollments', 'PDP', 'P'),
                     PDPPC: self.aetnaCaresourceQuery(agentStats[el].calls, 'enrollments', 'PDP', 'M'),
                     "PDP Conv %": self.aetnaCaresourceQuery(agentStats[el].calls, 'conversionRate', 'PDP'),
-                    Entries: self.aetnaCaresourceQuery(agentStats[el].calls, 'entries')
+                    Entries: self.aetnaCaresourceQuery(agentStats[el].calls, 'entries'),
+                    RSVP: self.aetnaCaresourceQuery(agentStats[el].calls, 'rsvp')
                 };
             }
             else if (self.props.match.params.client === "Caresource"){
@@ -211,6 +216,7 @@ class TopAgents extends Component {
         else if (query === 'homeVisits') result = stats.reduce((acc, call) => Number(call.hv) + acc, 0);
         else if (query === 'lacb') result = stats.reduce((acc, call) => Number(call.lacb) + acc, 0);
         else if (query === 'totalCalls') result = stats.reduce((acc, call) => Number(call.product === product) + acc, 0);
+        else if (query === 'rsvp') result = stats.reduce((acc, call) => acc + Number(call.rsvp), 0);
         else if (query === 'entries') {
             const enrollmentsMANE = this.aetnaCaresourceQuery(stats, 'enrollments', 'MA', 'P');
             const enrollmentsPDPNE = this.aetnaCaresourceQuery(stats, 'enrollments', 'PDP', 'P');
@@ -219,6 +225,18 @@ class TopAgents extends Component {
 
         if (result === null || isNaN(result) || result === undefined) return 0;
         return result;
+    }
+
+    leftImage(){
+        return (this.props.match.params.site === 'Provo')
+            ? <img src="../../public/CaptainUnderpants.png" alt="Captain Underpants" className="col-3"/>
+            : <div className="col-3"></div>;
+    }
+
+    rightImage(){
+        return (this.props.match.params.site === 'Provo')
+            ? <img src="../../public/JeanGreyPhoenix.png" alt="Jean Grey" className="col-3"/>
+            : <div className="col-3"></div>;
     }
 
     componentWillMount() {
@@ -233,7 +251,8 @@ class TopAgents extends Component {
                 <div className="row"><h1 className="mx-auto">Top Agent Stats</h1></div>
                 <br/>
                 <div className="row">
-                    <Table striped className="offset-3 col-6">
+                    { this.leftImage() }
+                    <Table striped className="col-6">
                         <thead>
                         <tr>
                             <th>Agent</th>
@@ -244,6 +263,7 @@ class TopAgents extends Component {
                         { this.populateTable() }
                         </tbody>
                     </Table>
+                    { this.rightImage() }
                 </div>
             </div>
         );

@@ -7,7 +7,7 @@ const TABLES = {
   aetna: {
       table: "convl.conversion_summary",
       date: "date",
-      returnFields: [{field: "product", as: "product"}, {field: "type", as: "callerType"}, {field: "enrollment", as: "enrollment"}, {field: "home_appt", as: "hv"}, {field: "lacb", as: "lacb"}, {field: "non_opp", as: "opportunity"}]
+      returnFields: [{field: "product", as: "product"}, {field: "type", as: "callerType"}, {field: "enrollment", as: "enrollment"}, {field: "home_appt", as: "hv"}, {field: "lacb", as: "lacb"}, {field: "rsvp", as: "rsvp"}, {field: "non_opp", as: "opportunity"}]
   },
   caresource: {
       table: "convl.caresource_conversion_summary",
