@@ -7,13 +7,17 @@ class TopAgents extends Component {
         this.updateStats = this.updateStats.bind(this);
         this.state = {
             stats: [],
-            topAgentCategories: ['LEADS', 'MANE', 'MAPC', 'PDPNE', 'PDPPC', 'RSVP'],
+            topAgentCategories: {
+                aetna: ['MANE', 'MAPC', 'PDPNE', 'PDPPC', 'RSVP', 'LEADS'],
+                anthem: ['Total Enrollments', 'T2', 'HPA', 'MA', 'PDP', 'AE', 'MS', 'MS Non-GI', 'DSNP'],
+                caresource: ['MANE', 'HV', 'LACB']
+            },
             counter: 0
         };
     }
 
     getCategory(){
-        return this.state.topAgentCategories[this.state.counter % this.state.topAgentCategories.length];
+        return this.state.topAgentCategories[this.props.match.params.client.toLowerCase()][this.state.counter % this.state.topAgentCategories[this.props.match.params.client.toLowerCase()].length];
     }
 
     updateStats(){
@@ -68,53 +72,41 @@ class TopAgents extends Component {
         let json = [];
         Object.keys(agentStats).sort(sorting).forEach( function(el){
             let jsonStats = {};
-            if (self.props.match.params.client === "Aetna"){
+            if (self.props.match.params.client.toLowerCase() === "aetna"){
                 jsonStats = {
                     "First Name": agentStats[el].fName,
                     "Last Name": agentStats[el].lName,
-                    "MA Calls": self.aetnaCaresourceQuery(agentStats[el].calls, 'totalCalls', 'MA'),
-                    "MANE": self.aetnaCaresourceQuery(agentStats[el].calls, 'enrollments', 'MA', 'P'),
+                    MANE: self.aetnaCaresourceQuery(agentStats[el].calls, 'enrollments', 'MA', 'P'),
                     MAPC: self.aetnaCaresourceQuery(agentStats[el].calls, 'enrollments', 'MA', 'M'),
                     HV: self.aetnaCaresourceQuery(agentStats[el].calls, 'homeVisits'),
                     LACB: self.aetnaCaresourceQuery(agentStats[el].calls, 'lacb'),
-                    "MA Raw Conv %": self.aetnaCaresourceQuery(agentStats[el].calls, 'rawConversionRate', 'MA'),
-                    "MA Conv %": self.aetnaCaresourceQuery(agentStats[el].calls, 'conversionRate', 'MA'),
-                    "PDP Calls": self.aetnaCaresourceQuery(agentStats[el].calls, 'totalCalls', 'PDP'),
                     PDPNE: self.aetnaCaresourceQuery(agentStats[el].calls, 'enrollments', 'PDP', 'P'),
                     PDPPC: self.aetnaCaresourceQuery(agentStats[el].calls, 'enrollments', 'PDP', 'M'),
-                    "PDP Conv %": self.aetnaCaresourceQuery(agentStats[el].calls, 'conversionRate', 'PDP'),
-                    Entries: self.aetnaCaresourceQuery(agentStats[el].calls, 'entries'),
                     RSVP: self.aetnaCaresourceQuery(agentStats[el].calls, 'rsvp')
                 };
             }
-            else if (self.props.match.params.client === "Caresource"){
+            else if (self.props.match.params.client.toLowerCase() === "caresource"){
                 jsonStats = {
                     "First Name": agentStats[el].fName,
                     "Last Name": agentStats[el].lName,
-                    "Calls": self.aetnaCaresourceQuery(agentStats[el].calls, 'totalCalls', 'MA'),
                     MANE: self.aetnaCaresourceQuery(agentStats[el].calls, 'enrollments', 'MA', 'P'),
                     HV: self.aetnaCaresourceQuery(agentStats[el].calls, 'homeVisits'),
-                    LACB: self.aetnaCaresourceQuery(agentStats[el].calls, 'lacb'),
-                    "Conv %": self.aetnaCaresourceQuery(agentStats[el].calls, 'conversionRate', 'MA')
+                    LACB: self.aetnaCaresourceQuery(agentStats[el].calls, 'lacb')
                 };
             }
-            else if (self.props.match.params.client === "Anthem"){
+            else if (self.props.match.params.client.toLowerCase() === "anthem"){
                 jsonStats = {
                     "First Name": agentStats[el].fName,
                     "Last Name": agentStats[el].lName,
-                    "Total Calls": self.anthemQuery(agentStats[el].calls, 'totalCalls', 'MA'),
-                    "Opportunities": self.anthemQuery(agentStats[el].calls, 'opportunities', 'MA'),
                     "Total Enrollments": self.anthemQuery(agentStats[el].calls, 'totalEnrollments'),
-                    "T2": self.anthemQuery(agentStats[el].calls, 'enrollments', 't2'),
-                    "HPA": self.anthemQuery(agentStats[el].calls, 'enrollments', 'hpa'),
-                    "MA": self.anthemQuery(agentStats[el].calls, 'enrollments', 'ma'),
-                    "PDP": self.anthemQuery(agentStats[el].calls, 'enrollments', 'pdp'),
-                    "AE": self.anthemQuery(agentStats[el].calls, 'enrollments', 'ae'),
-                    "MS": self.anthemQuery(agentStats[el].calls, 'enrollments', 'ms'),
+                    T2: self.anthemQuery(agentStats[el].calls, 'enrollments', 't2'),
+                    HPA: self.anthemQuery(agentStats[el].calls, 'enrollments', 'hpa'),
+                    MA: self.anthemQuery(agentStats[el].calls, 'enrollments', 'ma'),
+                    PDP: self.anthemQuery(agentStats[el].calls, 'enrollments', 'pdp'),
+                    AE: self.anthemQuery(agentStats[el].calls, 'enrollments', 'ae'),
+                    MS: self.anthemQuery(agentStats[el].calls, 'enrollments', 'ms'),
                     "MS Non-GI": self.anthemQuery(agentStats[el].calls, 'enrollments', 'ms non-gi'),
-                    "DSNP": self.anthemQuery(agentStats[el].calls, 'enrollments', 'dsnp'),
-                    "Conversion Rate": self.anthemQuery(agentStats[el].calls, 'conversionRate', 'PDP'),
-                    "Entries": self.props.countEntries(agentStats[el].calls)
+                    DSNP: self.anthemQuery(agentStats[el].calls, 'enrollments', 'dsnp')
                 };
             }
             else return;
@@ -228,20 +220,26 @@ class TopAgents extends Component {
     }
 
     leftImage(){
-        return (this.props.match.params.site === 'Provo')
-            ? <img src="../../public/CaptainUnderpants.png" alt="Captain Underpants" className="col-3"/>
+        return (this.props.match.params.site.toLowerCase() === 'provo')
+            ? <div className="col-3"><img src="../../public/CaptainUnderpants.png" alt="Captain Underpants" width="250px"/></div>
             : <div className="col-3"></div>;
     }
 
     rightImage(){
-        return (this.props.match.params.site === 'Provo')
-            ? <img src="../../public/JeanGreyPhoenix.png" alt="Jean Grey" className="col-3"/>
+        return (this.props.match.params.site.toLowerCase() === 'provo')
+            ? <div className="col-3"><img src="../../public/JeanGreyPhoenix.png" alt="Jean Grey" width="250px"/></div>
             : <div className="col-3"></div>;
     }
 
     componentWillMount() {
+        const self = this;
         this.updateStats();
-        setInterval(() => {this.updateStats(); this.setState({counter: this.state.counter+1})}, 60000);
+        setInterval( function() {
+            if(self.state.counter % self.state.topAgentCategories[self.props.match.params.client.toLowerCase()].length
+                === self.state.topAgentCategories[self.props.match.params.client.toLowerCase()].length - 1)
+                self.updateStats();
+            self.setState({counter: self.state.counter+1});
+        }, 60000);
     }
 
     render() {

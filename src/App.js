@@ -131,7 +131,7 @@ class App extends Component {
                 <div>
                     <Route exact path="/" render={() => <TopNavbar getLoggedIn={ this.getLoggedIn }  toggleLoggedIn={ this.toggleLoggedIn } getStats={ this.getStats } /> } />
                     <Route exact path="/" render={() => <Stats getLoggedIn={ this.getLoggedIn} getStats={ this.getStats }  getTotalSiteEnrollments={this.getTotalSiteEnrollments} countEntries={this.countEntries} /> } />
-                    <Route path="/:client(Aetna|Anthem|Caresource)/:site(Provo|San Antonio|Memphis|Sandy|Plantation|Roy)" component={TopAgents} />
+                    <Route path="/:client/:site" component={TopAgents} />
                 </div>
             </Router>
         );
