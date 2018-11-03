@@ -53,3 +53,10 @@ td[colspan] {
   padding: 6px 0 0 10px;
   margin: 0 10px 0 0;
 }
+#topAgentTitle {
+  font-size: 85px;
+}
+#topAgentTable * {
+  font-size: 55px;
+  padding: 0 0 0 0;
+}

@@ -173,7 +173,8 @@ router.route('/report/:client/:site/:startDate/:endDate?').get(function(req, res
     const table = TABLES[client];
 
     const query = `
-    SELECT stag.familyName AS lastName, stag.givenName AS firstName, nice.callpro_userid AS userid, ${table.returnFields.map(val => val.field + ' AS ' + val.as).join(', ')} 
+    SELECT stag.familyName AS lastName, stag.givenName AS firstName, nice.callpro_userid AS userid, IF(stag.jobValue = "Licensed Healthcare Agent", true, false) AS licensed,
+    ${table.returnFields.map(val => val.field + ' AS ' + val.as).join(', ')} 
     FROM iex_data.stag_adp_employeeinfo AS stag, iex_data.nice_agentroster_table AS nice, ${ table.table } AS conv
     WHERE stag.positionID = nice.adp_id
         AND nice.callpro_userid = conv.employee_id

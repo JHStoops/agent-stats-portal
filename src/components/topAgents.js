@@ -8,8 +8,8 @@ class TopAgents extends Component {
         this.state = {
             stats: [],
             topAgentCategories: {
-                aetna: ['MANE', 'MAPC', 'PDPNE', 'PDPPC', 'RSVP', 'LEADS'],
-                anthem: ['Total Enrollments', 'T2', 'HPA', 'MA', 'PDP', 'AE', 'MS', 'MS Non-GI', 'DSNP'],
+                aetna: ['RSVP', 'MANE', 'MAPC', 'PDPNE', 'PDPPC', 'LEADS'],
+                anthem: ['HPA', 'Total Enrollments', 'T2', 'MA', 'PDP', 'AE', 'MS', 'MS Non-GI', 'DSNP'],
                 caresource: ['MANE', 'HV', 'LACB']
             },
             counter: 0
@@ -33,7 +33,7 @@ class TopAgents extends Component {
         const key = this.getCategory();
         return this.state.stats
             .sort( (a, b) => (key === 'LEADS') ? (b.HV + b.LACB) - (a.HV + a.LACB) : b[key] - a[key])
-            .slice(0, 10)
+            .slice(0, 8)
             .filter( el => (key === 'LEADS') ? el.HV + el.LACB > 0 : el[key] > 0)
             .map( el =>
                 <tr key={el['First Name']+el['Last Name']}>
@@ -117,7 +117,7 @@ class TopAgents extends Component {
     }
 
     licensedVsUnlicensedCriteria(obj){
-        if (Number(sessionStorage.getItem('licensed')) === 1){ //if licensed
+        if (obj.licensed === 1){ //if licensed
             //Exhaustive list of qualifying disposition ID's
             if ( [171, 222, 271, 362, 375, 376, 400, 415, 434].includes(obj.dispoID) ) return obj.conversion | obj.enrollment;
             else return 0;
@@ -139,8 +139,7 @@ class TopAgents extends Component {
                 (acc, call) => {
                     if (call.product === null) return acc;
                     if (call.opportunity === 0) return acc;
-
-                    if ( sessionStorage.getItem('licensed')) return acc + [171, 222, 271, 362, 375, 376, 400, 415, 434].includes(call.dispoID);
+                    if (call.licensed === 1) return acc + [171, 222, 271, 362, 375, 376, 400, 415, 434].includes(call.dispoID);
                     else return Number(anthemProducts.reduce(
                         (bool, prod) => Number(call.product.toLowerCase().includes(prod)) | bool, 0)
                     ) + acc;
@@ -221,14 +220,14 @@ class TopAgents extends Component {
 
     leftImage(){
         return (this.props.match.params.site.toLowerCase() === 'provo')
-            ? <div className="col-3"><img src="../../public/CaptainUnderpants.png" alt="Captain Underpants" width="250px"/></div>
-            : <div className="col-3"></div>;
+            ? <div className="col-2"><img src="../../public/CaptainUnderpants.png" alt="Captain Underpants" width="250px"/></div>
+            : <div className="col-2"></div>;
     }
 
     rightImage(){
         return (this.props.match.params.site.toLowerCase() === 'provo')
-            ? <div className="col-3"><img src="../../public/JeanGreyPhoenix.png" alt="Jean Grey" width="250px"/></div>
-            : <div className="col-3"></div>;
+            ? <div className="col-2"><img src="../../public/JeanGreyPhoenix.png" alt="Jean Grey" width="250px"/></div>
+            : <div className="col-2"></div>;
     }
 
     componentWillMount() {
@@ -239,18 +238,16 @@ class TopAgents extends Component {
                 === self.state.topAgentCategories[self.props.match.params.client.toLowerCase()].length - 1)
                 self.updateStats();
             self.setState({counter: self.state.counter+1});
-        }, 60000);
+        }, 10000);
     }
 
     render() {
         return (
-            <div className="container">
-                <br/>
-                <div className="row"><h1 className="mx-auto">Top Agent Stats</h1></div>
-                <br/>
+            <div>
+                <div className="row"><h1 className="mx-auto" id="topAgentTitle">Top Agent Stats</h1></div>
                 <div className="row">
                     { this.leftImage() }
-                    <Table striped className="col-6">
+                    <Table striped className="col-8" id="topAgentTable">
                         <thead>
                         <tr>
                             <th>Agent</th>
